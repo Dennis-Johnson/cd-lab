@@ -4,6 +4,7 @@
 /*
 	Provide a file src as input, replace blank spaces and tabs with a single space.
 */
+
 int main(int argc, char *argv[]){
 	
 	if(argc != 3){
