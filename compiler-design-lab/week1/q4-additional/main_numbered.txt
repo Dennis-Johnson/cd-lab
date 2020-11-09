@@ -1,0 +1,41 @@
+   1 #include <stdio.h>
+   2 #include <stdlib.h>
+   3 #define BUFFER_LENGTH 120
+   4 /*
+   5 	Adds line numbers to a source c file given as input, writes modified code to
+   6 	a .txt file
+   7 */
+   8 
+   9 int main (int argc, char *argv[]){
+  10 	
+  11 	if(argc != 2){
+  12 		fprintf(stderr, "Usage: Source C file as input\n");
+  13 		exit(0);
+  14 	}
+  15 
+  16 	FILE *fin, *fout;
+  17 	int line_no = 0;
+  18 	char line[BUFFER_LENGTH];
+  19 	
+  20 	fin = fopen(argv[1], "r");
+  21 	if (fin == NULL) {
+  22 		fprintf(stderr, "Couldn't open input file\n");
+  23 		exit(1);
+  24 	}
+  25 	
+  26 	fout = fopen("main_numbered.txt", "w");
+  27 	if (fout == NULL) {
+  28 		fprintf(stderr, "Couldn't open output file\n");
+  29 		exit(1);
+  30 	}
+  31 	
+  32 	while (fgets(line, BUFFER_LENGTH, fin) != NULL) {
+  33 		line_no++;
+  34 		fprintf(fout, "%4d %s", line_no, line);
+  35 	} 
+  36 	
+  37 	fclose(fin);
+  38 	fclose(fout);
+  39 
+  40 	return 0;
+  41 }
