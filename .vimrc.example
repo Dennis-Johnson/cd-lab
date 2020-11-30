@@ -1,0 +1,22 @@
+syntax on
+set tabstop=2
+set termguicolors
+set confirm
+set shiftwidth=2
+set expandtab
+set autoindent
+set ai
+set number
+set hlsearch
+set paste
+set ruler
+set background=dark
+highlight Comment ctermfg=green
+
+call plug#begin('~/.vim/plugged')
+Plug 'morhetz/gruvbox'
+call plug#end()
+
+let g:gruvbox_contrast_dark = 'light'
+colorscheme gruvbox
+autocmd vimenter * ++nested colorscheme gruvbox
