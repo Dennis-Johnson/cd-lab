@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 	
 	if(argc != 3){
 		fprintf(stderr, "Usage: arg1: input file src, arg2: output file src\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 
 	FILE *inp, *out;
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]){
 	out = fopen(argv[2], "w");	
 	if(inp == NULL || out == NULL){
 		fprintf(stderr, "Error opening file\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	} 
  	
 	while((ch = fgetc(inp))!= EOF){
@@ -27,8 +27,8 @@ int main(int argc, char *argv[]){
 			wspace_count++;
 		} 
 		else {	
-			if(wspace_count > 0)
-				putc(' ', out);
+			if(wspace_count > 0 && ch != '\n')
+				fputc(' ', out);
 			
 			fputc(ch, out);
 			wspace_count = 0;
