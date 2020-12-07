@@ -17,7 +17,7 @@ int main( int argc, char *argv[] ){
 	
 	if( argc != 2){
 		fprintf(stderr, "Usage: source c file as sole input\n");
-		exit(0);	
+		exit(EXIT_FAILURE);	
 	}
 
 	FILE *fin;
@@ -27,7 +27,7 @@ int main( int argc, char *argv[] ){
 	fin = fopen(argv[1], "r");
 	if(fin == NULL){
 		fprintf(stderr, "Couldn't open input c source file\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 	
 	//Read line by line.

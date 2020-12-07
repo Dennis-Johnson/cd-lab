@@ -1,2 +1,2 @@
 Hey how are you
-void keyword hey
+void int keyword hey
