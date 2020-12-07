@@ -1,35 +1,31 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
-#define NUM_INT 5
 
 /*
 	Removes preprocessor directives from the specified source c file, and writes the 
-	modified text to removed.txt. Some of the preprocessor directives above are usused.
+	modified text to removed.txt.
 */
 
 int main(int argc, char *argv[]){
 	
-	if (argc != 2) {
-		fprintf(stderr, "Usage: source c file as sole input\n");
+	if (argc != 3) {
+		fprintf(stderr, "Usage: arg1: input C file src, arg2: output c file src\n");
 		exit(0);
 	}
 
 	FILE *in, *out;
 	int ch, temp;
-	char *output_path = "removed.txt";
 	
 	in  = fopen(argv[1], "r");
 	if(in == NULL) {
-		fprintf(stderr, "Error opening input file\n");
-		exit(1);
+		fprintf(stderr, "Error opening input file: %s\n", argv[1]);
+		exit(EXIT_FAILURE);
 	}
 	
-	out = fopen(output_path, "w");
-	
+	out = fopen(argv[2], "w");
 	if(out == NULL){
-		fprintf(stderr, "Error opening output file %s\n", output_path); 
-		exit(1);	
+		fprintf(stderr, "Error opening output file: %s\n", argv[2]); 
+		exit(EXIT_FAILURE);	
 	}	
 	
 	while ((ch = fgetc(in)) != EOF){

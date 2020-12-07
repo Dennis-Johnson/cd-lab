@@ -1,2 +1,0 @@
-hey what's your name
-this is meant to remove whitespace
