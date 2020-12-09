@@ -9,9 +9,8 @@
 */
 
 int main(){
-
- // Prints value of PI to stdout
- printf ("Value of PI is %f", PI);
+ int a = 1;
+ int b = a + 3;
  return 0;
 }
 
