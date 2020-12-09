@@ -25,6 +25,9 @@ typedef enum
     RIGHT_SQUARE_BRACKET,
     LEFT_CURLY_BRACE,
     RIGHT_CURLY_BRACE,
+    PERIOD,
+    COLON,
+    COMMA,
     NEW_LINE,
     WHITESPACE
 } TokenType;
@@ -46,6 +49,9 @@ static char *strings[] = {
     "RIGHT_SQUARE_BRACKET",
     "LEFT_CURLY_BRACE",
     "RIGHT_CURLY_BRACE",
+    "PERIOD",
+    "COLON",
+    "COMMA",
     "NEW_LINE",
     "WHITESPACE"};
 
@@ -244,6 +250,24 @@ Token *getNextToken(FILE *fin)
             break;
         }
     }
+    else if (ch == '.')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        type = PERIOD;
+    }
+    else if (ch == ',')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        type = COMMA;
+    }
+    else if (ch == ':')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        type = COLON;
+    }
 
     return initToken(type, buffer, rowNum, colNum);
 }
@@ -260,6 +284,10 @@ void displayToken(Token *token)
         return;
 
     printf("Index: %d, Row: %d, Col: %d, Name: %s, Type: %s\n", token->index, token->row, token->col, token->token_name, token->type);
+}
+
+void displayAngleBrackets(Token *token)
+{
 }
 
 static char keywords[32][10] = {"auto", "break", "case", "char", "const", "continue", "default", "double", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typeof", "union", "unsigned", "void", "volatile", "while", "do", "else"};

@@ -12,3 +12,4 @@ typedef struct Token
 
 Token *getNextToken(FILE *fin);
 void displayToken(Token *token);
+void displayAngleBrackets(Token *token);
