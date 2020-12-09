@@ -17,16 +17,28 @@ int main(int argc, char *argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	char *path;
+	const char *path;
 
 	// Preprocessing the input c file:
 	path = preprocess(argv[1]);
 
-	// Identify tokens and output to stdout
 	FILE *fin = fopen(path, "r");
+	if (fin == NULL)
+	{
+		fprintf(stderr, "Could not open processed file %s", path);
+		perror(" ");
+		exit(EXIT_FAILURE);
+	}
+
 	Token *token;
 
 	//Get just the first lexeme
+	token = getNextToken(fin);
+	displayToken(token);
+
+	token = getNextToken(fin);
+	displayToken(token);
+
 	token = getNextToken(fin);
 	displayToken(token);
 

@@ -1,22 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-
-char *preprocess(char *path)
-{
-    // 1. Remove whitespace
-    const char *removedWhitespacePath = "./temp/removedWS.i";
-    removeWhitespace(path, removedWhitespacePath);
-
-    // 2. Strip preprocessor directives
-    const char *strippedPPDirectives = "./temp/removedPPD.i";
-    stripPreprocessorDirectives(removedWhitespacePath, strippedPPDirectives);
-
-    // 3. Remove Comments
-    const char *removedCommentsPath = "./temp/removedComments.i";
-    removeComments(strippedPPDirectives, removedCommentsPath);
-
-    return removedCommentsPath;
-}
+#include "preprocess.h"
 
 int removeWhitespace(const char inputPath[], const char outputPath[])
 {
@@ -160,4 +144,21 @@ int removeComments(const char inputPath[], const char outputPath[])
     fclose(fin);
     fclose(fout);
     return 0;
+}
+
+const char *preprocess(char *path)
+{
+    // 1. Remove whitespace
+    const char *removedWhitespacePath = "./temp/removedWS.i";
+    removeWhitespace(path, removedWhitespacePath);
+
+    // 2. Strip preprocessor directives
+    const char *strippedPPDirectives = "./temp/removedPPD.i";
+    stripPreprocessorDirectives(removedWhitespacePath, strippedPPDirectives);
+
+    // 3. Remove Comments
+    const char *removedCommentsPath = "./temp/removedComments.i";
+    removeComments(strippedPPDirectives, removedCommentsPath);
+
+    return removedCommentsPath;
 }

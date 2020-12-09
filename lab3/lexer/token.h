@@ -10,6 +10,5 @@ typedef struct Token
   char type[TOKEN_TYPE_LENGTH];
 } Token;
 
-Token *createToken();
 Token *getNextToken(FILE *fin);
 void displayToken(Token *token);
