@@ -15,6 +15,7 @@ typedef enum
     REL_OP,
     ARTH_OP,
     ASSIGN_OP,
+    LOG_OP,
     END_OF_FILE,
     NEW_LINE,
     WHITESPACE
@@ -26,6 +27,7 @@ static char *strings[] = {
     "NUM_CONST",
     "REL_OP",
     "ARTH_OP",
+    "LOG_OP",
     "ASSIGN_OP",
     "END_OF_FILE",
     "NEW_LINE",
@@ -64,7 +66,6 @@ Token *getNextToken(FILE *fin)
 
     int ch, buf_index = 0;
     ch = fgetc(fin);
-    colNum++;
 
     if (ch == EOF)
         type = END_OF_FILE;
@@ -76,16 +77,16 @@ Token *getNextToken(FILE *fin)
     }
     else if (isspace(ch))
     {
-        colNum++;
         type = WHITESPACE;
         while (isspace(ch))
+        {
+            colNum++;
             ch = fgetc(fin);
-
+        }
         fseek(fin, -1L, SEEK_CUR);
     }
     else if (isalpha(ch))
     {
-        colNum++;
         while (isalpha(ch))
         {
             colNum++;
@@ -101,7 +102,6 @@ Token *getNextToken(FILE *fin)
     }
     else if (isdigit(ch))
     {
-        colNum++;
         type = NUM_CONST;
         while (isdigit(ch))
         {
@@ -116,12 +116,12 @@ Token *getNextToken(FILE *fin)
         colNum++;
         buffer[buf_index++] = ch;
         ch = fgetc(fin);
-        colNum++;
 
         if (ch == '=')
         {
             //Relational Operator ==
             buffer[buf_index++] = ch;
+            colNum++;
             type = REL_OP;
         }
         else
@@ -133,13 +133,15 @@ Token *getNextToken(FILE *fin)
     else if (ch == '<' || ch == '>' || ch == '!')
     {
         type = REL_OP;
-        colNum++;
         buffer[buf_index++] = ch;
-        ch = fgetc(fin);
         colNum++;
 
+        ch = fgetc(fin);
         if (ch == '=')
+        {
             buffer[buf_index++] = ch;
+            colNum++;
+        }
         else
             fseek(fin, -1L, SEEK_CUR);
     }
@@ -147,6 +149,34 @@ Token *getNextToken(FILE *fin)
     {
         type = ARTH_OP;
         buffer[buf_index++] = ch;
+    }
+    else if (ch == '&')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        ch = fgetc(fin);
+
+        if (ch == '&')
+        {
+            type = LOG_OP;
+            colNum++;
+        }
+        else
+            fseek(fin, -1L, SEEK_CUR);
+    }
+    else if (ch == '|')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        ch = fgetc(fin);
+
+        if (ch == '|')
+        {
+            type = LOG_OP;
+            colNum++;
+        }
+        else
+            fseek(fin, -1L, SEEK_CUR);
     }
 
     return initToken(type, buffer, rowNum, colNum);
