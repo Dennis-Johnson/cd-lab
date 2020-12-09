@@ -1,2 +1,3 @@
-auto 32 
-a= 32 + 4
+int main(){
+  return "DJ";
+}

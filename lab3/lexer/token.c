@@ -4,19 +4,27 @@
 #include <string.h>
 #include <ctype.h>
 
-#define LEN_BUFFER 128
+#define LEN_BUFFER 64
 int isKeyword(char str[]);
 
 typedef enum
 {
     KEYWORD,
     IDENTIFIER,
+    STRING_LIT,
     NUM_CONST,
     REL_OP,
     ARTH_OP,
     ASSIGN_OP,
     LOG_OP,
     END_OF_FILE,
+    SEMI_COLON,
+    LEFT_PAREN,
+    RIGHT_PAREN,
+    LEFT_SQUARE_BRACKET,
+    RIGHT_SQUARE_BRACKET,
+    LEFT_CURLY_BRACE,
+    RIGHT_CURLY_BRACE,
     NEW_LINE,
     WHITESPACE
 } TokenType;
@@ -24,12 +32,20 @@ typedef enum
 static char *strings[] = {
     "KEYWORD",
     "IDENTIFIER",
+    "STRING_LIT",
     "NUM_CONST",
     "REL_OP",
     "ARTH_OP",
     "LOG_OP",
     "ASSIGN_OP",
     "END_OF_FILE",
+    "SEMI_COLON",
+    "LEFT_PAREN",
+    "RIGHT_PAREN",
+    "LEFT_SQUARE_BRACKET",
+    "RIGHT_SQUARE_BRACKET",
+    "LEFT_CURLY_BRACE",
+    "RIGHT_CURLY_BRACE",
     "NEW_LINE",
     "WHITESPACE"};
 
@@ -111,6 +127,24 @@ Token *getNextToken(FILE *fin)
         }
         fseek(fin, -1L, SEEK_CUR);
     }
+    else if (ch == '"')
+    {
+        type = STRING_LIT;
+        colNum++;
+        buffer[buf_index++] = ch;
+
+        ch = fgetc(fin);
+        colNum++;
+
+        while (ch != '"')
+        {
+            colNum++;
+            buffer[buf_index++] = ch;
+            ch = fgetc(fin);
+        }
+
+        buffer[buf_index++] = ch;
+    }
     else if (ch == '=')
     {
         colNum++;
@@ -177,6 +211,38 @@ Token *getNextToken(FILE *fin)
         }
         else
             fseek(fin, -1L, SEEK_CUR);
+    }
+    else if (ch == ';')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        type = SEMI_COLON;
+    }
+    else if (ch == '(' || ch == ')' || ch == '[' || ch == ']' || ch == '{' || ch == '}')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        switch (ch)
+        {
+        case '(':
+            type = LEFT_PAREN;
+            break;
+        case ')':
+            type = RIGHT_PAREN;
+            break;
+        case '[':
+            type = LEFT_SQUARE_BRACKET;
+            break;
+        case ']':
+            type = RIGHT_SQUARE_BRACKET;
+            break;
+        case '{':
+            type = LEFT_CURLY_BRACE;
+            break;
+        case '}':
+            type = RIGHT_CURLY_BRACE;
+            break;
+        }
     }
 
     return initToken(type, buffer, rowNum, colNum);
