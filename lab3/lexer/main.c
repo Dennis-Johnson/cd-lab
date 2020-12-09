@@ -32,15 +32,15 @@ int main(int argc, char *argv[])
 
 	Token *token;
 
-	//Get just the first lexeme
-	token = getNextToken(fin);
-	displayToken(token);
+	//Get all lexemes
+	while (1)
+	{
+		token = getNextToken(fin);
+		displayToken(token);
 
-	token = getNextToken(fin);
-	displayToken(token);
-
-	token = getNextToken(fin);
-	displayToken(token);
+		if (strcmp(token->type, "END_OF_FILE") == 0)
+			break;
+	}
 
 	fclose(fin);
 	return 0;

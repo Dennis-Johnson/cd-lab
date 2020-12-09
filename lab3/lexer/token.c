@@ -91,8 +91,9 @@ Token *getNextToken(FILE *fin)
             ch = fgetc(fin);
         }
     }
+
     // Don't create Tokens for these
-    if (type == NEW_LINE || type == WHITESPACE)
+    if (type == WHITESPACE)
         return NULL;
 
     return initToken(type, buffer, index, rowNum, colNum);
@@ -105,15 +106,34 @@ void displayToken(Token *token)
         fprintf(stderr, "Empty token, cannot display");
     }
 
+    if (strcmp(token->type, "NEW_LINE") == 0)
+        return;
+
     printf("Index: %d, Row: %d, Col: %d, Name: %s, Type: %s\n", token->index, token->row, token->col, token->token_name, token->type);
 }
 
 static char keywords[32][10] = {"auto", "break", "case", "char", "const", "continue", "default", "double", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typeof", "union", "unsigned", "void", "volatile", "while", "do", "else"};
+static char dataTypes[][10] = {
+    "double",
+    "float",
+    "int",
+    "long",
+    "short",
+    "char"};
+
 int isKeyword(char str[])
 {
     for (int i = 0; i < 32; i++)
         if (strcmp(str, keywords[i]) == 0)
             return 1;
 
+    return 0;
+}
+
+int isDataType(char str[])
+{
+    for (int i = 0; i < 6; i++)
+        if (strcmp(str, dataTypes[i]) == 0)
+            return 1;
     return 0;
 }
