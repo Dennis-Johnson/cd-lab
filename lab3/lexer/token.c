@@ -12,6 +12,9 @@ typedef enum
     KEYWORD,
     IDENTIFIER,
     NUM_CONST,
+    REL_OP,
+    ARTH_OP,
+    ASSIGN_OP,
     END_OF_FILE,
     NEW_LINE,
     WHITESPACE
@@ -21,6 +24,9 @@ static char *strings[] = {
     "KEYWORD",
     "IDENTIFIER",
     "NUM_CONST",
+    "REL_OP",
+    "ARTH_OP",
+    "ASSIGN_OP",
     "END_OF_FILE",
     "NEW_LINE",
     "WHITESPACE"};
@@ -30,20 +36,23 @@ char *TokenTypeToString(TokenType t)
     return strings[t];
 }
 
-Token *initToken(TokenType type, char *value, int index, int row, int col)
+Token *initToken(TokenType type, char *value, int row, int col)
 {
+    static int index = 0;
+    index++;
+
     Token *ptr = malloc(sizeof(Token));
     ptr->index = index;
     ptr->row = row;
     ptr->col = col;
     strncpy(ptr->token_name, value, TOKEN_NAME_LENGTH);
     strncpy(ptr->type, TokenTypeToString(type), TOKEN_TYPE_LENGTH);
+
     return ptr;
 }
 
 Token *getNextToken(FILE *fin)
 {
-    static int index = 0;
     static int rowNum = 0;
     static int colNum = 0;
 
@@ -62,20 +71,26 @@ Token *getNextToken(FILE *fin)
     else if (ch == '\n')
     {
         type = NEW_LINE;
+        colNum = 0;
         rowNum++;
     }
     else if (isspace(ch))
     {
+        colNum++;
         type = WHITESPACE;
+        while (isspace(ch))
+            ch = fgetc(fin);
     }
     else if (isalpha(ch))
     {
+        colNum++;
         while (isalpha(ch))
         {
+            colNum++;
             buffer[buf_index++] = ch;
             ch = fgetc(fin);
         }
-        // At this point, you probably hit the whitespace after the word
+        fseek(fin, -1L, SEEK_CUR);
 
         if (isKeyword(buffer))
             type = KEYWORD;
@@ -84,19 +99,55 @@ Token *getNextToken(FILE *fin)
     }
     else if (isdigit(ch))
     {
+        colNum++;
         type = NUM_CONST;
         while (isdigit(ch))
         {
+            colNum++;
             buffer[buf_index++] = ch;
             ch = fgetc(fin);
         }
+        fseek(fin, -1L, SEEK_CUR);
+    }
+    else if (ch == '=')
+    {
+        colNum++;
+        buffer[buf_index++] = ch;
+        ch = fgetc(fin);
+        colNum++;
+
+        if (ch == '=')
+        {
+            //Relational Operator ==
+            buffer[buf_index++] = ch;
+            type = REL_OP;
+        }
+        else
+        {
+            type = ASSIGN_OP;
+            fseek(fin, -1L, SEEK_CUR);
+        }
+    }
+    else if (ch == '<' || ch == '>' || ch == '!')
+    {
+        type = REL_OP;
+        colNum++;
+        buffer[buf_index++] = ch;
+        ch = fgetc(fin);
+        colNum++;
+
+        if (ch == '=')
+            buffer[buf_index++] = ch;
+        else
+            fseek(fin, -1L, SEEK_CUR);
+    }
+    else if (ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '%')
+    {
+        type = ARTH_OP;
+        buffer[buf_index++] = ch;
     }
 
-    // Don't create Tokens for these
-    if (type == WHITESPACE)
-        return NULL;
-
-    return initToken(type, buffer, index, rowNum, colNum);
+    return initToken(type, buffer, rowNum, colNum);
 }
 
 void displayToken(Token *token)
@@ -104,9 +155,10 @@ void displayToken(Token *token)
     if (!token)
     {
         fprintf(stderr, "Empty token, cannot display");
+        perror(" ");
     }
 
-    if (strcmp(token->type, "NEW_LINE") == 0)
+    if (strcmp(token->type, "NEW_LINE") == 0 || strcmp(token->type, "WHITESPACE") == 0)
         return;
 
     printf("Index: %d, Row: %d, Col: %d, Name: %s, Type: %s\n", token->index, token->row, token->col, token->token_name, token->type);

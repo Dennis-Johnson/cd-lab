@@ -1,3 +1,2 @@
-keyw int 
 auto 32 
-32
+a= 32 + 4
