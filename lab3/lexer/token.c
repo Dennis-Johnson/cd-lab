@@ -80,6 +80,8 @@ Token *getNextToken(FILE *fin)
         type = WHITESPACE;
         while (isspace(ch))
             ch = fgetc(fin);
+
+        fseek(fin, -1L, SEEK_CUR);
     }
     else if (isalpha(ch))
     {
