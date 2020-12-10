@@ -10,6 +10,30 @@
 int isKeyword(char str[]);
 int isDataType(char str[]);
 
+char *token_strings[] = {
+    "KEYWORD",
+    "IDENTIFIER",
+    "DATA_TYPE",
+    "STRING_LIT",
+    "NUM_CONST",
+    "REL_OP",
+    "ARTH_OP",
+    "LOG_OP",
+    "ASSIGN_OP",
+    "END_OF_FILE",
+    "SEMI_COLON",
+    "LEFT_PAREN",
+    "RIGHT_PAREN",
+    "LEFT_SQUARE_BRACKET",
+    "RIGHT_SQUARE_BRACKET",
+    "LEFT_CURLY_BRACE",
+    "RIGHT_CURLY_BRACE",
+    "PERIOD",
+    "COLON",
+    "COMMA",
+    "NEW_LINE",
+    "WHITESPACE"};
+
 char *TokenTypeToString(TokenType t)
 {
     return token_strings[t];
@@ -17,16 +41,16 @@ char *TokenTypeToString(TokenType t)
 
 Token *initToken(TokenType type, char *value, int row, int col)
 {
-		static int index = 0;
-     
+    static int index = 0;
+
     Token *ptr = malloc(sizeof(Token));
     ptr->row = row;
     ptr->col = col;
-    
-    if(type == IDENTIFIER)
-      ptr->index = ++index;
-    else 
-      ptr->index = 0;
+
+    if (type == IDENTIFIER)
+        ptr->index = ++index;
+    else
+        ptr->index = 0;
 
     strncpy(ptr->token_name, value, TOKEN_NAME_LENGTH);
     ptr->type = type;
@@ -76,9 +100,9 @@ Token *getNextToken(FILE *fin)
         }
         fseek(fin, -1L, SEEK_CUR);
 
-        if(isDataType(buffer))
+        if (isDataType(buffer))
             type = DATA_TYPE;
-        else if(isKeyword(buffer))
+        else if (isKeyword(buffer))
             type = KEYWORD;
         else
             type = IDENTIFIER;
