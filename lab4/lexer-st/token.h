@@ -10,6 +10,7 @@ typedef enum
   KEYWORD,
   IDENTIFIER,
   DATA_TYPE,
+  FUNCTION,
   STRING_LIT,
   NUM_CONST,
   REL_OP,

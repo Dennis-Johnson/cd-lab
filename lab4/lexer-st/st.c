@@ -6,7 +6,7 @@
 
 #define TABLE_LENGTH 10
 
-char symbol_buffer[LEN_SYMBOL_BUFFER];
+char data_type_buffer[LEN_SYMBOL_BUFFER];
 
 // Create a new symbol table
 // For this week, make only LOCAL symbol tables for each function
@@ -41,7 +41,7 @@ int addEntry(Symbol* SymbolTable, Token* NewToken){
   
   entry.index = index;
   strcpy(entry.lexeme_name, NewToken->token_name);
-  strcpy(entry.data_type, symbol_buffer);
+  strcpy(entry.data_type, data_type_buffer);
   entry.size = 0;
 
   SymbolTable[index] = entry; 

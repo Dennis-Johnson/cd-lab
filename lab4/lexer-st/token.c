@@ -15,6 +15,7 @@ char *token_strings[] = {
     "KEYWORD",
     "IDENTIFIER",
     "DATA_TYPE",
+    "FUNCTION",
     "STRING_LIT",
     "NUM_CONST",
     "REL_OP",
@@ -49,16 +50,19 @@ Token *createToken(TokenType type, char *value, int row, int col)
     ptr->col = col;
   
 
-    if (type == IDENTIFIER)
+    if (type == FUNCTION){
+      //Add entry will create a new local symbol table
+      
+    }
+    else if (type == DATA_TYPE){
+      //Buffered so that addSymbol in st.c knows what the data type is
+      memset(data_type_buffer, '\0', sizeof(data_type_buffer));
+      strcat(data_type_buffer, value);
+    }
+    else if (type == IDENTIFIER)
         ptr->index = ++index;
     else
         ptr->index = 0;
-    
-    if (type == DATA_TYPE){
-      //Buffered so that addSymbol in st.c knows what the data type is
-      memset(symbol_buffer, '\0', sizeof(symbol_buffer));
-      strcat(symbol_buffer, value);
-    }
     
     strncpy(ptr->token_name, value, TOKEN_NAME_LENGTH);
     ptr->type = type;
@@ -106,14 +110,19 @@ Token *getNextToken(FILE *fin)
             buffer[buf_index++] = ch;
             ch = fgetc(fin);
         }
-        fseek(fin, -1L, SEEK_CUR);
-
+        
         if (isDataType(buffer))
             type = DATA_TYPE;
         else if (isKeyword(buffer))
             type = KEYWORD;
-        else
-            type = IDENTIFIER;
+        else {
+           if(ch == '(')
+             type = FUNCTION;
+           else 
+             type = IDENTIFIER;
+        }
+
+        fseek(fin, -1L, SEEK_CUR);
     }
     else if (isdigit(ch))
     {
@@ -273,7 +282,7 @@ void displayToken(Token *token)
         perror(" ");
     }
 
-    if (token->type == NEW_LINE || token->type == WHITESPACE)
+    if (token->type == NEW_LINE || token->type == WHITESPACE || token->type == END_OF_FILE)
         return;
 
     printf("Index: %d, Row: %d, Col: %d, Name: %s, Type: %s\n", token->index, token->row, token->col, token->token_name, TokenTypeToString(token->type));

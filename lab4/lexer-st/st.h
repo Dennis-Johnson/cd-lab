@@ -5,7 +5,7 @@
 #define LEN_DATATYPE 16
 #define LEN_SYMBOL_BUFFER 16
 
-extern char symbol_buffer[LEN_SYMBOL_BUFFER];
+extern char data_type_buffer[LEN_SYMBOL_BUFFER];
 
 typedef struct Symbol {
   int index;
