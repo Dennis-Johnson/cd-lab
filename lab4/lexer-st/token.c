@@ -282,7 +282,7 @@ void displayToken(Token *token)
         perror(" ");
     }
 
-    if (token->type == NEW_LINE || token->type == WHITESPACE || token->type == END_OF_FILE)
+    if (token->type == NEW_LINE || token->type == WHITESPACE)
         return;
 
     printf("Index: %d, Row: %d, Col: %d, Name: %s, Type: %s\n", token->index, token->row, token->col, token->token_name, TokenTypeToString(token->type));
