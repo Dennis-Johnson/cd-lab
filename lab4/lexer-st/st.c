@@ -5,40 +5,65 @@
 #include <string.h>
 
 #define TABLE_LENGTH 10
-#define L_BUFFER_LEN 10
+
+char symbol_buffer[LEN_SYMBOL_BUFFER];
 
 // Create a new symbol table
 // For this week, make only LOCAL symbol tables for each function
-Token* createSymbolTable(){
-  Token* SymbolTable = malloc(TABLE_LENGTH * sizeof(Token*));
+Symbol* createSymbolTable(){
+  Symbol* SymbolTable = calloc(TABLE_LENGTH,  sizeof(Symbol));
   return SymbolTable;  
 }
 
 //Add an entry to an existing symbol table
-Token* addEntry(Token* SymbolTable, Token* NewToken){
+int addEntry(Symbol* SymbolTable, Token* NewToken){
   //The index in the ST is the index on the token, assigned by getNextToken;
-  int index = NewToken->index;
-  SymbolTable[index] = NewToken; 
-  return SymbolTable;  
+  if(!NewToken){
+    fprintf(stderr, "Error: empty token\n");
+    return -1;
+  }
+
+  static int index = 0;
+
+  if(!SymbolTable){
+    //Create a new symbol table
+    index = 0;
+    SymbolTable = createSymbolTable();
+  }
+  else if (symbolExists(SymbolTable, NewToken)){
+    // This symbol entry was made previously
+    return -1;
+  }
+  else index++;
+
+  //TODO: Fix this index stuff later, buffer, size as well!
+  Symbol entry;
+  
+  entry.index = index;
+  strcpy(entry.lexeme_name, NewToken->token_name);
+  strcpy(entry.data_type, symbol_buffer);
+  entry.size = 0;
+
+  SymbolTable[index] = entry; 
+  return 1;  
 }
 
 //Check whether Token index already exists on ST or not
-int symbolExists(Token *SymbolTable, Token* token){
+int symbolExists(Symbol *SymbolTable, Token* token){
   if (!token || !SymbolTable){
     fprintf(stderr, "Empty token or symbol table\n");
-    return 0;  
+    return -1;  
   }
-
-  int t_index = token->index;
-  for(int i = 0; i < TABLE_LENGTH; i++){
-    ptr = SymbolTable[i];
-
+  
+  Symbol* ptr = SymbolTable;
+  for(int i = 0; i < TABLE_LENGTH; i++, ptr++){
+    
     if(ptr == NULL){
-      //NOT FOUND
+    // Not found
       return 0;
     }
 
-    if(ptr->index == t_index)
+    if(ptr->index == token->index)
       return 1;
   }
 

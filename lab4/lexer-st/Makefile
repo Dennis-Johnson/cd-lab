@@ -3,8 +3,8 @@ flags = -Wall -pedantic
 
 all: lexer
 
-lexer: main.o preprocess.o token.o
-	$(cc) $(flags) main.o preprocess.o token.o -o lexer
+lexer: main.o preprocess.o token.o st.o
+	$(cc) $(flags) main.o preprocess.o token.o st.o -o lexer
 
 main: main.o 
 	$(cc) $(flags) -c main.c

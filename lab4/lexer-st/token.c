@@ -1,4 +1,5 @@
 #include "token.h"
+#include "st.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,19 +40,26 @@ char *TokenTypeToString(TokenType t)
     return token_strings[t];
 }
 
-Token *initToken(TokenType type, char *value, int row, int col)
+Token *createToken(TokenType type, char *value, int row, int col)
 {
     static int index = 0;
 
     Token *ptr = malloc(sizeof(Token));
     ptr->row = row;
     ptr->col = col;
+  
 
     if (type == IDENTIFIER)
         ptr->index = ++index;
     else
         ptr->index = 0;
-
+    
+    if (type == DATA_TYPE){
+      //Buffered so that addSymbol in st.c knows what the data type is
+      memset(symbol_buffer, '\0', sizeof(symbol_buffer));
+      strcat(symbol_buffer, value);
+    }
+    
     strncpy(ptr->token_name, value, TOKEN_NAME_LENGTH);
     ptr->type = type;
 
@@ -254,7 +262,7 @@ Token *getNextToken(FILE *fin)
         type = COLON;
     }
 
-    return initToken(type, buffer, rowNum, colNum);
+    return createToken(type, buffer, rowNum, colNum);
 }
 
 void displayToken(Token *token)
