@@ -29,7 +29,9 @@ int addEntry(Token* token){
   }
 
   static int index = 0;
-
+  if (token->type == FUNCTION)
+    printf("\nDT_BUFFER: %s, isDT: %d\n",data_type_buffer, isDataType(data_type_buffer));
+  
   if(token->type == FUNCTION && isDataType(data_type_buffer)){
     //Create a new symbol table
     local_st_index++;
@@ -51,13 +53,14 @@ int addEntry(Token* token){
   else index++;
 
   //TODO: Fix this index stuff later, buffer, size as well!
-  Symbol entry = LocalSymbolTables[local_st_index][index];
+  Symbol* entry = &(LocalSymbolTables[local_st_index][index]);
   
-  entry.index = index;
-  strcpy(entry.lexeme_name, token->token_name);
-  strcpy(entry.data_type, data_type_buffer);
-  entry.size = 0;
+  entry->index = index;
+  strcpy(entry->lexeme_name, token->token_name);
+  strcpy(entry->data_type, data_type_buffer);
+  entry->size = 0;
   
+  displaySymbolTable(LocalSymbolTables[local_st_index]);
   return index;  
 }
 

@@ -63,7 +63,12 @@ Token *createToken(TokenType type, char *value, int row, int col)
       // Add to the current local symbol table
       // Assign the returned value to the index
 
-      ptr->index = addEntry(ptr);
+      int ret_val = addEntry(ptr);
+      if(ret_val == 1){
+        printf("Symbol table entry exists\n");
+      }
+      else 
+        ptr->index = ret_val;
     }
     
     return ptr;
