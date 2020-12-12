@@ -194,6 +194,7 @@ Token *getNextToken(FILE *fin)
     }
     else if (ch == '&')
     {
+        printf("LOG OP?\n");
         colNum++;
         buffer[buf_index++] = ch;
         ch = fgetc(fin);
@@ -209,6 +210,7 @@ Token *getNextToken(FILE *fin)
     else if (ch == '|')
     {
         colNum++;
+        printf("LOG OP?\n");
         buffer[buf_index++] = ch;
         ch = fgetc(fin);
 
@@ -285,7 +287,7 @@ void displayToken(Token *token)
     if (token->type == NEW_LINE || token->type == WHITESPACE)
         return;
 
-    printf("Index: %d, Row: %d, Col: %d, Name: %s, Type: %s\n", token->index, token->row, token->col, token->token_name, TokenTypeToString(token->type));
+    printf("Index: %-3d | Row: %-3d | Col: %-3d | Name: %-8s | Type: %-10s\n", token->index, token->row, token->col, token->token_name, TokenTypeToString(token->type));
 }
 
 void displayAngleBrackets(Token *token)
