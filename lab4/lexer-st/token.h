@@ -1,5 +1,5 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#ifndef TOKEN_H_
+#define TOKEN_H_
 
 #include <stdio.h>
 #define TOKEN_NAME_LENGTH 128
@@ -45,4 +45,5 @@ Token *getNextToken(FILE *fin);
 void displayToken(Token *token);
 void displayAngleBrackets(Token *token);
 
-#endif //TOKEN_H
+int isDataType(char str[]);
+#endif //TOKEN_H_

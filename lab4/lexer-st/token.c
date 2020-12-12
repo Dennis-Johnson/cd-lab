@@ -43,30 +43,29 @@ char *TokenTypeToString(TokenType t)
 
 Token *createToken(TokenType type, char *value, int row, int col)
 {
-    static int index = 0;
-
     Token *ptr = malloc(sizeof(Token));
     ptr->row = row;
     ptr->col = col;
-  
+    
+    // Index is -1 by dafault, only assigned if type is function or identifier
+    ptr->index = -1;
+    
+    strncpy(ptr->token_name, value, TOKEN_NAME_LENGTH);
+    ptr->type = type;
+    
 
-    if (type == FUNCTION){
-      //Add entry will create a new local symbol table
-      
-    }
-    else if (type == DATA_TYPE){
+    if (type == DATA_TYPE){
       //Buffered so that addSymbol in st.c knows what the data type is
       memset(data_type_buffer, '\0', sizeof(data_type_buffer));
       strcat(data_type_buffer, value);
     }
-    else if (type == IDENTIFIER)
-        ptr->index = ++index;
-    else
-        ptr->index = 0;
-    
-    strncpy(ptr->token_name, value, TOKEN_NAME_LENGTH);
-    ptr->type = type;
+    else if(type == FUNCTION || type == IDENTIFIER){
+      // Add to the current local symbol table
+      // Assign the returned value to the index
 
+      ptr->index = addEntry(ptr);
+    }
+    
     return ptr;
 }
 

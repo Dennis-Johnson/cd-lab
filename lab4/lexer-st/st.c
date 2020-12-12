@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TABLE_LENGTH 10
-
+Symbol* LocalSymbolTables[NUM_LOCAL_TABLES];
+int local_st_index = 0;
 char data_type_buffer[LEN_SYMBOL_BUFFER];
 
 // Create a new symbol table
@@ -16,36 +16,49 @@ Symbol* createSymbolTable(){
 }
 
 //Add an entry to an existing symbol table
-int addEntry(Symbol* SymbolTable, Token* NewToken){
-  //The index in the ST is the index on the token, assigned by getNextToken;
-  if(!NewToken){
-    fprintf(stderr, "Error: empty token\n");
+// If added returns the index of the entry to be assigned to index of token as well
+int addEntry(Token* token){
+  if(token == NULL){
+    fprintf(stderr, "Error: NULL token\n");
+    return -1;
+  } 
+
+  if( token->type != FUNCTION && token->type != IDENTIFIER){
+    fprintf(stderr, "Error: Can't make entry for type - %s\n", TokenTypeToString(token->type));
     return -1;
   }
 
   static int index = 0;
 
-  if(!SymbolTable){
+  if(token->type == FUNCTION && isDataType(data_type_buffer)){
     //Create a new symbol table
+    local_st_index++;
+
+    if(local_st_index == NUM_LOCAL_TABLES){
+      fprintf(stderr, "Error: Can't make any more local symbol tables!\n");
+      exit(EXIT_FAILURE);
+    }
+
     index = 0;
-    SymbolTable = createSymbolTable();
+    LocalSymbolTables[local_st_index] = createSymbolTable();
   }
-  else if (symbolExists(SymbolTable, NewToken)){
+  
+  else if (symbolExists(LocalSymbolTables[local_st_index], token)){
     // This symbol entry was made previously
-    return -1;
+    return 1;
   }
+  
   else index++;
 
   //TODO: Fix this index stuff later, buffer, size as well!
-  Symbol entry;
+  Symbol entry = LocalSymbolTables[local_st_index][index];
   
   entry.index = index;
-  strcpy(entry.lexeme_name, NewToken->token_name);
+  strcpy(entry.lexeme_name, token->token_name);
   strcpy(entry.data_type, data_type_buffer);
   entry.size = 0;
-
-  SymbolTable[index] = entry; 
-  return 1;  
+  
+  return index;  
 }
 
 //Check whether Token index already exists on ST or not
@@ -68,4 +81,22 @@ int symbolExists(Symbol *SymbolTable, Token* token){
   }
 
   return 0;
+}
+
+void displaySymbolTable(Symbol* st){
+  if(st == NULL){
+    fprintf(stderr, "NULLPTR: SymbolTable does not exist!\n");
+    return;
+  }
+}
+
+void displayAllLocalSymbolTables(){
+ int index = 0;
+
+ printf("Displaying All Local Symbol Tables:\n");
+
+ if(index <= local_st_index){
+  displaySymbolTable(LocalSymbolTables[index]);
+ }
+
 }

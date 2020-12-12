@@ -1,4 +1,5 @@
 #include "token.h"
+#include "st.h"
 #include "preprocess.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,9 +32,9 @@ int main(int argc, char *argv[])
 	}
 
 	Token *token;
-  Token *SymbolTable;
-
-	//Get all lexemes
+  //Symbol* LocalSymbolTables[NUM_LOCAL_TABLES];
+	
+  //Get all lexemes
 	while (1)
 	{
 		token = getNextToken(fin);
@@ -43,6 +44,7 @@ int main(int argc, char *argv[])
 			break;
 	}
 
+  displayAllLocalSymbolTables();
 	fclose(fin);
 	return 0;
 }
