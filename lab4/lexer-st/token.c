@@ -303,11 +303,7 @@ void displayToken(Token *token)
     if (token->type == NEW_LINE || token->type == WHITESPACE)
         return;
 
-    printf("Index: %-3d | Row: %-3d | Col: %-3d | Name: %-8s | Type: %-10s\n", token->index, token->row, token->col, token->token_name, TokenTypeToString(token->type));
-}
-
-void displayAngleBrackets(Token *token)
-{
+    printf("Index: %-3d | Row: %-3d | Col: %-3d | Type: %-8s | Name: %-10s\n", token->index, token->row, token->col, TokenTypeToString(token->type), token->token_name);
 }
 
 static char keywords[NUM_KEYWORDS][10] = {"auto", "bool", "break", "case", "char", "const", "continue", "default", "double", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typeof", "union", "unsigned", "void", "volatile", "while", "do", "else", "true", "false"};

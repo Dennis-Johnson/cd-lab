@@ -19,5 +19,5 @@ st: st.o
 	$(cc) $(flags) -c st.c
 
 clean: 
-	rm lexer *.o
+	rm main lexer *.o
 
