@@ -1,4 +1,4 @@
-cc = clang 
+cc = gcc 
 flags = -Wall -pedantic
 debug_flags = -g -Wall -pedantic
 all: main
