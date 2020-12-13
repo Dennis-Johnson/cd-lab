@@ -5,7 +5,7 @@
 #include <string.h>
 #include <ctype.h>
 #define NUM_KEYWORDS 33
-#define NUM_DATATYPES 7
+#define NUM_DATATYPES 8
 #define LEN_BUFFER 64
 
 int isKeyword(char str[]);
@@ -106,9 +106,9 @@ Token *getNextToken(FILE *fin)
         }
         fseek(fin, -1L, SEEK_CUR);
     }
-    else if (isalpha(ch))
+    else if (isalpha(ch) || ch == '_')
     {
-        while (isalpha(ch))
+        while (isalpha(ch) || ch == '_')
         {
             colNum++;
             buffer[buf_index++] = ch;
@@ -305,7 +305,7 @@ static char dataTypes[][10] = {
     "int",
     "long",
     "short",
-    "char", "bool"};
+    "char", "bool", "void"};
 
 int isKeyword(char str[])
 {

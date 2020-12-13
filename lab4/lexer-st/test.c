@@ -1,4 +1,7 @@
 int main(){
-  int a = 2;
-  if( a ==3);  
+  int i = (a==3);  
+}
+
+void ret_string(){
+  return "Dennis";
 }
