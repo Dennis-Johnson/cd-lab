@@ -25,7 +25,7 @@ Symbol* createSymbolTable(){
   return SymbolTable;  
 }
 
-//Add an entry to an existing symbol table
+// Add an entry to an existing symbol table
 // If added returns the index of the entry to be assigned to index of token as well
 int addEntry(Token* token){
   if(token == NULL){
