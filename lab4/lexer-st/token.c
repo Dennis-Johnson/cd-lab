@@ -30,6 +30,7 @@ char *token_strings[] = {
     "RIGHT_SQUARE_BRACKET",
     "LEFT_CURLY_BRACE",
     "RIGHT_CURLY_BRACE",
+    "AMPERSAND",
     "PERIOD",
     "COLON",
     "COMMA",
@@ -69,6 +70,9 @@ Token *createToken(TokenType type, char *value, int row, int col)
       }
       else 
         ptr->index = ret_val;
+    }
+    else if (type == SEMI_COLON){
+      memset(data_type_buffer, '\0', sizeof(data_type_buffer));
     }
     
     return ptr;
@@ -210,7 +214,6 @@ Token *getNextToken(FILE *fin)
     }
     else if (ch == '&')
     {
-        printf("LOG OP?\n");
         colNum++;
         buffer[buf_index++] = ch;
         ch = fgetc(fin);
@@ -220,13 +223,14 @@ Token *getNextToken(FILE *fin)
             type = LOG_OP;
             colNum++;
         }
-        else
-            fseek(fin, -1L, SEEK_CUR);
+        else { 
+          type = AMPERSAND;  
+          fseek(fin, -1L, SEEK_CUR);
+        }
     }
     else if (ch == '|')
     {
         colNum++;
-        printf("LOG OP?\n");
         buffer[buf_index++] = ch;
         ch = fgetc(fin);
 

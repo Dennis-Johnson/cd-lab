@@ -1,8 +1,8 @@
 #ifndef ST_H_
 #define ST_H_
 
-#define NUM_LOCAL_TABLES 5
-#define TABLE_LENGTH 10
+#define NUM_LOCAL_TABLES 10
+#define TABLE_LENGTH 20
 
 #define LEN_NAME 64
 #define LEN_DATATYPE 16

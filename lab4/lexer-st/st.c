@@ -33,6 +33,12 @@ int addEntry(Token* token){
     return -1;
   } 
 
+  static int index = 0;
+  if(index == TABLE_LENGTH){
+    fprintf(stderr, "Error: No more space in current table\n");
+    return -1;
+  }
+
   //returned index of entry, if already present. Else -1 for not found. 
   int ret_ind;
 
@@ -40,12 +46,11 @@ int addEntry(Token* token){
     fprintf(stderr, "Error: Can't make entry for type - %s\n", TokenTypeToString(token->type));
     return -1;
   }
-
-  static int index = 0;
   
   if(token->type == FUNCTION && isDataType(data_type_buffer)){
     //Create a new symbol table
     local_st_index++;
+    printf("Function: %s, DT: %s, lsti: %d\n", token->token_name, data_type_buffer, local_st_index);
 
     if(local_st_index == NUM_LOCAL_TABLES){
       fprintf(stderr, "Error: Can't make any more local symbol tables!\n");
@@ -69,7 +74,12 @@ int addEntry(Token* token){
   
   entry->index = index;
   strcpy(entry->lexeme_name, token->token_name);
-  strcpy(entry->data_type, data_type_buffer);
+  
+  // Check global ST if there's no data_type, this is a temp' hack
+  if(strcmp("", data_type_buffer) == 0)
+    strncpy(entry->data_type, "Func", sizeof("Func"));
+  else
+    strcpy(entry->data_type, data_type_buffer);
   
   if (token->type == FUNCTION)
     entry->size = -1;
