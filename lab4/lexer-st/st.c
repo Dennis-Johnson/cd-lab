@@ -47,7 +47,6 @@ int addEntry(Token* token){
     //Create a new symbol table
     local_st_index++;
 
-    printf("New table: Local ST index %d\n", local_st_index);
     if(local_st_index == NUM_LOCAL_TABLES){
       fprintf(stderr, "Error: Can't make any more local symbol tables!\n");
       exit(EXIT_FAILURE);
@@ -66,7 +65,6 @@ int addEntry(Token* token){
       index++;
   }
   
-  printf("Local ST index %d\n", local_st_index);
   Symbol* entry = &(LocalSymbolTables[local_st_index][index]);
   
   entry->index = index;

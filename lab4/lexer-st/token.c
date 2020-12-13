@@ -120,10 +120,22 @@ Token *getNextToken(FILE *fin)
         else if (isKeyword(buffer))
             type = KEYWORD;
         else {
-           if(ch == '(')
-             type = FUNCTION;
-           else 
-             type = IDENTIFIER;
+          int temp = ch;
+          long int extra_chars_read = 0;
+
+          if(isspace(temp)){
+            while(isspace(temp)){
+              temp = fgetc(fin);
+              extra_chars_read++;
+            }
+          }
+           
+          if(temp == '(')
+            type = FUNCTION;
+          else 
+            type = IDENTIFIER;
+          
+          fseek(fin, -1 * extra_chars_read, SEEK_CUR);
         }
 
         fseek(fin, -1L, SEEK_CUR);
