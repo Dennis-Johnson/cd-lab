@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#define NUM_KEYWORDS 33
+#define NUM_KEYWORDS 35
 #define NUM_DATATYPES 8
 #define LEN_BUFFER 64
 
@@ -310,7 +310,7 @@ void displayAngleBrackets(Token *token)
 {
 }
 
-static char keywords[NUM_KEYWORDS][10] = {"auto", "bool", "break", "case", "char", "const", "continue", "default", "double", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typeof", "union", "unsigned", "void", "volatile", "while", "do", "else"};
+static char keywords[NUM_KEYWORDS][10] = {"auto", "bool", "break", "case", "char", "const", "continue", "default", "double", "enum", "extern", "float", "for", "goto", "if", "int", "long", "register", "return", "short", "signed", "sizeof", "static", "struct", "switch", "typeof", "union", "unsigned", "void", "volatile", "while", "do", "else", "true", "false"};
 static char dataTypes[][10] = {
     "double",
     "float",
@@ -318,6 +318,24 @@ static char dataTypes[][10] = {
     "long",
     "short",
     "char", "bool", "void"};
+
+size_t getDataTypeSize(char* dt){
+  if(strcmp(dt, "int") == 0)
+    return sizeof(int);
+  else if(strcmp(dt, "char") == 0)
+    return sizeof(char);
+  else if(strcmp(dt, "float") == 0)
+    return sizeof(float);
+  else if(strcmp(dt, "void") == 0)
+    return sizeof(void);
+  else if(strcmp(dt, "double") == 0)
+    return sizeof(double);
+  else if(strcmp(dt, "long") == 0)
+    return sizeof(long);
+  else if(strcmp(dt, "bool") == 0 || strcmp(dt, "short") == 0)
+    return sizeof(short);
+  else return 0;
+}
 
 int isKeyword(char str[])
 {

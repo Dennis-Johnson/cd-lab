@@ -2,6 +2,7 @@ int main(){
  int i = (a==3);
 }
 
-void ret_string (){
+void func (){
+ bool b = true;
  return "Dennis";
 }

@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 	while (1)
 	{
 		token = getNextToken(fin);
-		displayToken(token);
+		//displayToken(token);
     
 		if (token->type == END_OF_FILE)
 			break;

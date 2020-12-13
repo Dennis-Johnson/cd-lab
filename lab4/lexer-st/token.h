@@ -44,6 +44,7 @@ char *TokenTypeToString(TokenType t);
 Token *getNextToken(FILE *fin);
 void displayToken(Token *token);
 void displayAngleBrackets(Token *token);
+size_t getDataTypeSize(char* dt);
 
 int isDataType(char str[]);
 #endif //TOKEN_H_

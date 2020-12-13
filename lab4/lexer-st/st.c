@@ -70,7 +70,11 @@ int addEntry(Token* token){
   entry->index = index;
   strcpy(entry->lexeme_name, token->token_name);
   strcpy(entry->data_type, data_type_buffer);
-  entry->size = 0;
+  
+  if (token->type == FUNCTION)
+    entry->size = -1;
+  else
+    entry->size = getDataTypeSize(data_type_buffer);
  
   return index;  
 }
