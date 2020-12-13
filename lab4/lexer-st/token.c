@@ -64,8 +64,8 @@ Token *createToken(TokenType type, char *value, int row, int col)
       // Assign the returned value to the index
 
       int ret_val = addEntry(ptr);
-      if(ret_val == 1){
-        printf("Symbol table entry exists\n");
+      if(ret_val == -2){
+        printf("Symbol table entry exists for %s\n", ptr->token_name);
       }
       else 
         ptr->index = ret_val;

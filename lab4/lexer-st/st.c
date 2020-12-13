@@ -47,7 +47,7 @@ int addEntry(Token* token){
   
   else if (symbolExists(LocalSymbolTables[local_st_index], token)){
     // This symbol entry was made previously
-    return 1;
+    return -2;
   }
   
   else index++;
@@ -60,7 +60,8 @@ int addEntry(Token* token){
   strcpy(entry->data_type, data_type_buffer);
   entry->size = 0;
   
-  displaySymbolTable(LocalSymbolTables[local_st_index]);
+  printf("Added entry for lexeme_name %s index %d\n", entry->lexeme_name, entry->index);
+  //displaySymbolTable(LocalSymbolTables[local_st_index]);
   return index;  
 }
 
@@ -72,15 +73,19 @@ int symbolExists(Symbol *SymbolTable, Token* token){
   }
   
   Symbol* ptr = SymbolTable;
+  printf("Checking local symbol table %d\n", local_st_index);
+
   for(int i = 0; i < TABLE_LENGTH; i++, ptr++){
-    
-    if(ptr == NULL){
+    printf("Compare token t_name %s and table lex_name %s\n", token->token_name, ptr->lexeme_name); 
+    if(strcmp(ptr->lexeme_name, token->token_name) != 0){
     // Not found
+      printf("%s not found in symbol table\n", token->token_name);
       return 0;
     }
-
-    if(ptr->index == token->index)
+    else{
+      printf("Found in table!\n");
       return 1;
+    }
   }
 
   return 0;
