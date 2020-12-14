@@ -18,7 +18,7 @@ void Id_List();     // Id_List --> id Id_List_Prime
 void Id_List_Prime();   //Id_List_Prime --> , Id_List | EPSILON
 void Assign_Stmt();   // Assign_Stmt --> id = Assign_Stmt_Prime
 void Assign_Stmt_Prime(); //Assign_Stmt_Prime --> id ; | num ;
-void error();
+void error(TokenType type);
 
 int parse(FILE *fin){
   // fin is an open file pointer to the preprocessed input file
@@ -69,19 +69,19 @@ void Program(){
                 printf("Parsing Sucessful!\n");
                 exit(EXIT_SUCCESS);
               }
-              else error();
+              else error(END_OF_FILE);
             }
-            else error();
+            else error(RIGHT_CURLY_BRACE);
           }
-          else error();
+          else error(LEFT_CURLY_BRACE);
         }
-        else error();
+        else error(RIGHT_PAREN);
       }
-      else error();
+      else error(LEFT_PAREN);
     }
-    else error();
+    else error(FUNCTION);
   }
-  else error();
+  else error(DATA_TYPE);
 }
 
 void Declarations(){ //Produces EPSILON
@@ -97,7 +97,7 @@ void Declarations(){ //Produces EPSILON
     if(token->type == SEMI_COLON){
       Declarations();
     }
-    else {printf("no semi colon\n");error();} 
+    else error(SEMI_COLON);
   }
 }
 
@@ -107,11 +107,10 @@ void Data_Type(){
   else
     token = getNextToken(fin);
   
-  printf("Here\n");
   if(isDataType(token->token_name)){
     return;
   }
-  else error();
+  else error(DATA_TYPE);
 }
 
 void Id_List(){
@@ -120,7 +119,7 @@ void Id_List(){
   if(token->type == IDENTIFIER){
     Id_List_Prime();
   }
-  else error();
+  else error(IDENTIFIER);
 }
 
 void Id_List_Prime(){
@@ -143,9 +142,9 @@ void Assign_Stmt(){
     if(token->type == ASSIGN_OP){
       Assign_Stmt_Prime();
     }
-    else error();
+    else error(ASSIGN_OP);
   }
-  else error();
+  else error(IDENTIFIER);
 }
 
 void Assign_Stmt_Prime(){
@@ -157,13 +156,13 @@ void Assign_Stmt_Prime(){
     if(token->type == SEMI_COLON){
       return;  
     }
-    else error();
+    else error(SEMI_COLON);
   }
-  else error();
+  else error(IDENTIFIER); //TODO: Make this a variadic function
 }
 
 
-void error(){
-  printf("ERROR: last read token->token_name %s\n", token->token_name);
-  exit(EXIT_FAILURE);
+void error(TokenType type){
+  printf("ERROR: Expected %s\n",TokenTypeToString(type));
+  // exit(EXIT_FAILURE);
 }

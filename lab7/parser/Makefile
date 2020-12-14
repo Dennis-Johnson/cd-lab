@@ -1,5 +1,5 @@
 cc = gcc
-flags = -Wall -g -pedantic
+flags = -Wall -pedantic
 
 all: parser
 
