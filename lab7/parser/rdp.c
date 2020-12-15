@@ -1,168 +1,274 @@
+/*
+Recursive Descent Parser for the subset of C grammar in Lab Q7.1
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include "token.h"
 
+#define NUM_OF_RULES 7
+
+typedef enum
+{
+  Follow_Program,
+  Follow_Declarations,
+  Follow_Data_Type,
+  Follow_Id_List,
+  Follow_Id_List_Prime,
+  Follow_Assign_Stmt,
+  Follow_Assign_Stmt_Prime
+} Rule_Numbers;
+
+int LEN_FOLLOW_SET[NUM_OF_RULES] = {1, 1, 1, 1, 1, 1, 1};
+
+TokenType FollowSet[NUM_OF_RULES][5] =
+    {{END_OF_FILE},
+     {IDENTIFIER},
+     {IDENTIFIER},
+     {SEMI_COLON},
+     {SEMI_COLON},
+     {RIGHT_CURLY_BRACE},
+     {RIGHT_CURLY_BRACE}};
+
 FILE *fin;
+Token *prevToken;
 Token *token;
-int unget_flag = 0;
 
-/*
-Recursive Descent Parser for the subset of C grammar in Q7.1
-*/
-
-void Program();   // Program --> int main () { Declarations Assign_Stmt }
-void Declarations();   // Declarations --> Data_Type Id_List ; Declarations | EPSILON
-void Data_Type();     // Data_Type --> int | char
-void Id_List();     // Id_List --> id Id_List_Prime
-void Id_List_Prime();   //Id_List_Prime --> , Id_List | EPSILON
-void Assign_Stmt();   // Assign_Stmt --> id = Assign_Stmt_Prime
+void Program();           // Program --> int main () { Declarations Assign_Stmt }
+void Declarations();      // Declarations --> Data_Type Id_List ; Declarations | EPSILON
+void Data_Type();         // Data_Type --> int | char
+void Id_List();           // Id_List --> id Id_List_Prime
+void Id_List_Prime();     //Id_List_Prime --> , Id_List | EPSILON
+void Assign_Stmt();       // Assign_Stmt --> id = Assign_Stmt_Prime
 void Assign_Stmt_Prime(); //Assign_Stmt_Prime --> id ; | num ;
+
 void error(TokenType type);
+void errorWithString(TokenType type, char *name);
+void errorFollow(Rule_Numbers rule_number);
+int inSyncSet(Rule_Numbers rule_number);
 
-int parse(FILE *fin){
+void _getNextToken()
+{
+  prevToken = token;
+  token = getNextToken(fin);
+}
+
+int parse(FILE *fin)
+{
   // fin is an open file pointer to the preprocessed input file
-
-  if(fin == NULL){
+  if (fin == NULL)
+  {
     fprintf(stderr, "Error: Invalid file pointer!\n");
     exit(EXIT_FAILURE);
   }
 
-  printf("Parsing\n");
-  
-  /*
-  while(1){
-    token = getNextToken(fin);
-    displayToken(token);
+  printf("Begin Parser: \n");
 
-    if (token->type == END_OF_FILE)
-      break;
-  }*/
   Program();
-  return 0;  
+  return 0;
 }
 
-void Program(){
-  token = getNextToken(fin);
+void Program()
+{
+  _getNextToken();
 
-  if(strcmp(token->token_name, "int") == 0){
-    token = getNextToken(fin);
-    
-    if(strcmp(token->token_name, "main") == 0){
-      token = getNextToken(fin);
+  if (strcmp(token->token_name, "int") == 0)
+  {
+    _getNextToken();
 
-      if(token->type == LEFT_PAREN){
-        token = getNextToken(fin);
+    if (strcmp(token->token_name, "main") == 0)
+    {
+      _getNextToken();
 
-        if(token->type == RIGHT_PAREN){
-          token = getNextToken(fin);
+      if (token->type == LEFT_PAREN)
+      {
+        _getNextToken();
 
-          if(token->type == LEFT_CURLY_BRACE){
+        if (token->type == RIGHT_PAREN)
+        {
+          _getNextToken();
+
+          if (token->type == LEFT_CURLY_BRACE)
+          {
             Declarations();
             Assign_Stmt();
 
-            token = getNextToken(fin);
-            if(token->type == RIGHT_CURLY_BRACE){
-              
-              token = getNextToken(fin);
-              if(token->type == END_OF_FILE){
+            _getNextToken();
+            if (token->type == RIGHT_CURLY_BRACE)
+            {
+
+              _getNextToken();
+              if (token->type == END_OF_FILE)
+              {
                 printf("Parsing Sucessful!\n");
                 exit(EXIT_SUCCESS);
               }
-              else error(END_OF_FILE);
+              else
+                error(END_OF_FILE);
             }
-            else error(RIGHT_CURLY_BRACE);
+            else
+              error(RIGHT_CURLY_BRACE);
           }
-          else error(LEFT_CURLY_BRACE);
+          else
+            error(LEFT_CURLY_BRACE);
         }
-        else error(RIGHT_PAREN);
+        else
+          error(RIGHT_PAREN);
       }
-      else error(LEFT_PAREN);
+      else
+        error(LEFT_PAREN);
     }
-    else error(FUNCTION);
+    else
+      errorWithString(FUNCTION, "main");
   }
-  else error(DATA_TYPE);
+  else
+    errorWithString(DATA_TYPE, "int");
 }
 
-void Declarations(){ //Produces EPSILON
-  token = getNextToken(fin);
-  unget_flag = 1;
+void Declarations() //Produces EPSILON
+{
+  _getNextToken();
 
-  //Check FIRST set of Declarations
-  if(isDataType(token->token_name)){
+  //Checking FIRST set of Declarations
+  if (isDataType(token->token_name))
+  {
     Data_Type();
     Id_List();
 
-    // token = getNextToken(fin);
-    if(token->type == SEMI_COLON){
+    _getNextToken();
+    if (token->type == SEMI_COLON)
+    {
       Declarations();
     }
-    else error(SEMI_COLON);
+    else
+      error(SEMI_COLON);
   }
-}
-
-void Data_Type(){
-  if(unget_flag == 1)
-    unget_flag = 0;
-  else
-    token = getNextToken(fin);
-  
-  if(isDataType(token->token_name)){
+  else if (inSyncSet(Follow_Declarations))
+  {
+    ungetToken(fin, token);
     return;
   }
-  else error(DATA_TYPE);
+  else
+    errorFollow(Follow_Declarations);
 }
 
-void Id_List(){
-  token = getNextToken(fin);
+void Data_Type()
+{
+  if (isDataType(token->token_name))
+  {
+    return;
+  }
+  else
+    error(DATA_TYPE);
+}
 
-  if(token->type == IDENTIFIER){
+void Id_List()
+{
+  _getNextToken();
+
+  if (token->type == IDENTIFIER)
+  {
     Id_List_Prime();
   }
-  else error(IDENTIFIER);
+  else
+    error(IDENTIFIER);
 }
 
-void Id_List_Prime(){
-  token = getNextToken(fin);
+void Id_List_Prime() //Produces EPSILON
+{
+  _getNextToken();
 
-  if(token->type == COMMA){
-    Id_List();  
+  if (token->type == COMMA)
+  {
+    Id_List();
   }
+  else if (inSyncSet(Follow_Id_List_Prime))
+  {
+    ungetToken(fin, token);
+    return;
+  }
+  else
+    errorFollow(Follow_Id_List_Prime);
 }
 
-void Assign_Stmt(){
-  if(unget_flag)
-    unget_flag = 0;
-  else 
-    token = getNextToken(fin);
+void Assign_Stmt()
+{
 
-  if(token->type == IDENTIFIER){
-    token = getNextToken(fin);
+  _getNextToken();
 
-    if(token->type == ASSIGN_OP){
+  if (token->type == IDENTIFIER)
+  {
+    _getNextToken();
+
+    if (token->type == ASSIGN_OP)
+    {
       Assign_Stmt_Prime();
     }
-    else error(ASSIGN_OP);
+    else
+      error(ASSIGN_OP);
   }
-  else error(IDENTIFIER);
+  else
+    error(IDENTIFIER);
 }
 
-void Assign_Stmt_Prime(){
-  token = getNextToken(fin);
+void Assign_Stmt_Prime()
+{
+  _getNextToken();
 
-  if(token->type == IDENTIFIER || token->type == NUM_CONST){
-    token = getNextToken(fin);
+  if (token->type == IDENTIFIER || token->type == NUM_CONST)
+  {
+    _getNextToken();
 
-    if(token->type == SEMI_COLON){
-      return;  
+    if (token->type == SEMI_COLON)
+    {
+      return;
     }
-    else error(SEMI_COLON);
+    else
+      error(SEMI_COLON);
   }
-  else error(IDENTIFIER); //TODO: Make this a variadic function
+  else
+    error(IDENTIFIER);
 }
 
+int inSyncSet(Rule_Numbers rule_number)
+{
+  // Used by productions that generate EPSILON to check if token read
+  // is in it's Follow/Sync set or not.
+  for (int i = 0; i < LEN_FOLLOW_SET[rule_number]; i++)
+    if (FollowSet[rule_number][i] == token->type)
+      return 1;
 
-void error(TokenType type){
-  printf("ERROR: Expected %s\n",TokenTypeToString(type));
-  // exit(EXIT_FAILURE);
+  return 0;
+}
+
+void error(TokenType type)
+{
+  printf("Row: %d, Col: %d -- ERROR: Expected %s after %s: %s\n", token->row, token->col, TokenTypeToString(type), TokenTypeToString(prevToken->type), prevToken->token_name);
+  exit(EXIT_FAILURE);
+}
+
+void errorWithString(TokenType type, char *name)
+{
+  printf("Row: %d, Col: %d -- ERROR: Expected %s: %s after %s: %s\n", token->row, token->col, TokenTypeToString(type), name, TokenTypeToString(prevToken->type), prevToken->token_name);
+  exit(EXIT_FAILURE);
+}
+
+void errorFollow(Rule_Numbers rule_number)
+{
+  // For productions that produce EPSILON, if the token we read isn't part of it's follow set,
+  // Tell the user we expected to see a token from it's follow/synch set
+  printf("Row: %d, Col: %d -- ERROR: Expected {", token->row, token->col);
+  for (int i = 0; i < LEN_FOLLOW_SET[rule_number]; i++)
+  {
+    printf(" %s ", TokenTypeToString(FollowSet[rule_number][i]));
+
+    // Beautify :P
+    if (i + 1 != LEN_FOLLOW_SET[rule_number])
+      printf("or ");
+    else
+      printf("}\n");
+  }
+
+  exit(EXIT_FAILURE);
 }
