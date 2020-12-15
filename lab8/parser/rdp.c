@@ -7,7 +7,7 @@ Recursive Descent Parser for the subset of C grammar in Lab Q7.1
 #include <string.h>
 #include "token.h"
 
-#define NUM_OF_RULES 7
+#define NUM_OF_RULES 16
 
 typedef enum
 {
@@ -16,32 +16,61 @@ typedef enum
   Follow_Data_Type,
   Follow_Id_List,
   Follow_Id_List_Prime,
+  Follow_Id_List_Prime_Prime,
+  Follow_Stmt_List,
+  Follow_Stmt, 
   Follow_Assign_Stmt,
-  Follow_Assign_Stmt_Prime
+  Follow_Expr,
+  Follow_Expr_Prime,
+  Follow_Simple_Expr,
+  Follow_Simple_Expr_Prime,
+  Follow_Term,
+  Follow_Term_Prime,
+  Follow_Factor
 } Rule_Numbers;
 
-int LEN_FOLLOW_SET[NUM_OF_RULES] = {1, 1, 1, 1, 1, 1, 1};
+int LEN_FOLLOW_SET[NUM_OF_RULES] = {1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 2, 3, 3, 4};
 
 TokenType FollowSet[NUM_OF_RULES][5] =
     {{END_OF_FILE},
+     {IDENTIFIER, RIGHT_CURLY_BRACE},
      {IDENTIFIER},
-     {IDENTIFIER},
+     {SEMI_COLON},
      {SEMI_COLON},
      {SEMI_COLON},
      {RIGHT_CURLY_BRACE},
-     {RIGHT_CURLY_BRACE}};
+     {IDENTIFIER, RIGHT_CURLY_BRACE},
+     {SEMI_COLON},
+     {SEMI_COLON},
+     {SEMI_COLON},
+     {SEMI_COLON, REL_OP},
+     {SEMI_COLON, REL_OP},
+     {SEMI_COLON, REL_OP, ADD_OP},
+     {SEMI_COLON, REL_OP, ADD_OP},
+     {SEMI_COLON, REL_OP, ADD_OP, MUL_OP},
+    };
 
 FILE *fin;
 Token *prevToken;
 Token *token;
 
-void Program();           // Program --> int main () { Declarations Assign_Stmt }
-void Declarations();      // Declarations --> Data_Type Id_List ; Declarations | EPSILON
-void Data_Type();         // Data_Type --> int | char
-void Id_List();           // Id_List --> id Id_List_Prime
-void Id_List_Prime();     //Id_List_Prime --> , Id_List | EPSILON
-void Assign_Stmt();       // Assign_Stmt --> id = Assign_Stmt_Prime
-void Assign_Stmt_Prime(); //Assign_Stmt_Prime --> id ; | num ;
+void Program();             // Program --> int main () { Declarations Stmt_List }
+void Declarations();        // Declarations --> Data_Type Id_List ; Declarations | EPSILON
+void Data_Type();           // Data_Type --> int | char | double | void .....
+void Id_List();             // Id_List --> id Id_List_Prime
+void Id_List_Prime();       // Id_List_Prime --> , Id_List | [ NUM_CONST ] ID_List_Prime_Prime | EPSILON
+void Id_List_Prime_Prime(); // Id_List_Prime_Prime --> , Id_List | EPSILON
+void Stmt_List();           // Stmt_List --> Stmt Stmt_List | EPSILON
+void Stmt();                // Stmt --> Assign_Stmt ;
+void Assign_Stmt();         // Assign_Stmt --> id = Expr
+void Expr();                // Expr --> Simple_Expr Expr_Prime | EPSILON
+void Expr_Prime();          // REL_OP Simple_Expr | EPSILON
+void Simple_Expr();         // Term Simple_Expr_Prime 
+void Simple_Expr_Prime();   // ADD_OP Term Simple_Expr_Prime | EPISILON
+void Term();                // Factor Term_Prime
+void Term_Prime();          // MUL_OP Factor Term_Prime | EPSILON
+void Factor();              // IDENTIFIER | NUM_CONST
+// Note: EPSILON is not a real token, we move on to the next Production with the last token read. 
 
 void error(TokenType type);
 void errorWithString(TokenType type, char *name);
@@ -92,7 +121,7 @@ void Program()
           if (token->type == LEFT_CURLY_BRACE)
           {
             Declarations();
-            Assign_Stmt();
+            Stmt_List();
 
             _getNextToken();
             if (token->type == RIGHT_CURLY_BRACE)
@@ -102,7 +131,7 @@ void Program()
               if (token->type == END_OF_FILE)
               {
                 printf("Parsing Sucessful!\n");
-                exit(EXIT_SUCCESS);
+                return;
               }
               else
                 error(END_OF_FILE);
@@ -183,8 +212,24 @@ void Id_List_Prime() //Produces EPSILON
   {
     Id_List();
   }
+  else if (token->type == LEFT_SQUARE_BRACKET){
+    _getNextToken();
+
+    if (token->type == NUM_CONST){
+      _getNextToken();
+
+      if(token->type == RIGHT_SQUARE_BRACKET){
+        Id_List_Prime_Prime();
+      }
+      else 
+        error(RIGHT_SQUARE_BRACKET);
+    }
+    else 
+      error(NUM_CONST);
+  }
   else if (inSyncSet(Follow_Id_List_Prime))
   {
+    // This means we produced an EPSILON
     ungetToken(fin, token);
     return;
   }
@@ -192,43 +237,136 @@ void Id_List_Prime() //Produces EPSILON
     errorFollow(Follow_Id_List_Prime);
 }
 
-void Assign_Stmt()
-{
-
+void Id_List_Prime_Prime(){ //Produces EPISLON
   _getNextToken();
 
-  if (token->type == IDENTIFIER)
-  {
-    _getNextToken();
-
-    if (token->type == ASSIGN_OP)
-    {
-      Assign_Stmt_Prime();
-    }
-    else
-      error(ASSIGN_OP);
+  if(token->type == COMMA){
+    Id_List();
   }
-  else
-    error(IDENTIFIER);
+  else if(inSyncSet(Follow_Id_List_Prime_Prime)){
+    //Produced EPSILON
+    ungetToken(fin, token);
+    return;
+  }
+  else errorFollow(Follow_Id_List_Prime_Prime);
 }
 
-void Assign_Stmt_Prime()
-{
+
+void Stmt_List(){ //Produces EPSILON
   _getNextToken();
+  
+  //Check FIRST of Stmt_List
+  if(token->type == IDENTIFIER){
+    Stmt();
+    Stmt_List();
+  }
+  else if(inSyncSet(Follow_Stmt_List)){
+    //Produced EPSILON
+    ungetToken(fin, token);
+    return;
+  }
+  else errorFollow(Follow_Stmt_List);
+}
 
-  if (token->type == IDENTIFIER || token->type == NUM_CONST)
-  {
+void Stmt(){
+  // Checking FIRST of Stmt
+  if(token->type == IDENTIFIER){
+    Assign_Stmt();
+
     _getNextToken();
-
-    if (token->type == SEMI_COLON)
-    {
+    if(token->type == SEMI_COLON){
       return;
     }
-    else
-      error(SEMI_COLON);
+    else error(SEMI_COLON);
   }
-  else
+  else error(IDENTIFIER);
+}
+
+
+void Assign_Stmt(){
+  //Check first of Assign_Stmt
+  if(token->type == IDENTIFIER){
+    _getNextToken();
+
+    if(token->type == ASSIGN_OP){
+      Expr();
+    }
+    else error(ASSIGN_OP);
+  }
+  else error(IDENTIFIER);
+}
+
+void Expr(){
+  Simple_Expr();
+  Expr_Prime();
+}
+
+void Expr_Prime(){ //Produces EPSILON
+  _getNextToken();
+
+  //Check FIRST set of Expr_Prime
+  if(token->type == REL_OP){
+    Simple_Expr();
+  }
+  else if(inSyncSet(Follow_Expr_Prime)){
+    //Produced EPSILON
+    ungetToken(fin, token);
+    return;
+  }
+  else errorFollow(Follow_Expr_Prime);
+}
+
+void Simple_Expr(){
+  Term();
+  Simple_Expr_Prime();
+}
+
+void Simple_Expr_Prime(){ //Produces EPSILON
+  _getNextToken();
+
+  //Check FIRST set of Simple_Expr_Prime
+  if(token->type == ADD_OP){
+    Term();
+    Simple_Expr_Prime();
+  }
+  else if(inSyncSet(Follow_Simple_Expr_Prime)){
+    //Produced EPSILON
+    ungetToken(fin, token);
+    return;
+  }
+  else errorFollow(Follow_Simple_Expr_Prime);
+}
+
+void Term(){
+  Factor();
+  Term_Prime();
+}
+
+void Term_Prime(){
+  _getNextToken();
+
+  //Check FIRST set of Term_Prime
+  if(token->type == MUL_OP){
+    Factor();
+    Term_Prime();
+  }
+  else if(inSyncSet(Follow_Term_Prime)){
+    ungetToken(fin, token);
+    return;
+  }
+  else errorFollow(Follow_Term_Prime);
+}
+
+void Factor(){
+  _getNextToken();
+
+  if(token->type == IDENTIFIER || token->type == NUM_CONST)
+    return;
+  else {
+    printf("Should have been either, fix this ambiguity!");
     error(IDENTIFIER);
+    error(NUM_CONST);
+  }
 }
 
 int inSyncSet(Rule_Numbers rule_number)

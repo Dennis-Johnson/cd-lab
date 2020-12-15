@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
 	}
 
   parse(fin);
+  displayAllLocalSymbolTables();
 	fclose(fin);
 	return 0;
 }
