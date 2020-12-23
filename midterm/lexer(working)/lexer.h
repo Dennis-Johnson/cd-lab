@@ -6,7 +6,6 @@
 #include <string.h>
 #include <ctype.h>
 
-#define LEN_INPUT_BUFFER 2046
 #define LEN_NAME 32
 
 typedef enum
@@ -58,8 +57,6 @@ typedef struct Token
     TokenType type;
 } Token;
 
-extern char input_buffer[LEN_INPUT_BUFFER];
-extern int ip_indx;
 extern FILE *fin;
 extern char *TokenStrings[];
 
