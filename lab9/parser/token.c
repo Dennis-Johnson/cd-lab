@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+
 #define NUM_KEYWORDS 35
 #define NUM_DATATYPES 8
 #define LEN_BUFFER 64
@@ -119,6 +120,7 @@ Token *getNextToken(FILE *fin)
 
         int ch, buf_index = 0;
         ch = fgetc(fin);
+
         if (ch == EOF)
             type = END_OF_FILE;
         else if (ch == '\n')
@@ -242,7 +244,8 @@ Token *getNextToken(FILE *fin)
             type = ADD_OP;
             buffer[buf_index++] = ch;
         }
-        else if (ch == '*' || ch == '/' || ch == '%'){
+        else if (ch == '*' || ch == '/' || ch == '%')
+        {
             type = MUL_OP;
             buffer[buf_index++] = ch;
         }

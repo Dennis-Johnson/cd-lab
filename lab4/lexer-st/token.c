@@ -47,34 +47,37 @@ Token *createToken(TokenType type, char *value, int row, int col)
     Token *ptr = malloc(sizeof(Token));
     ptr->row = row;
     ptr->col = col;
-    
+
     // Index is -1 by dafault, only assigned if type is function or identifier
     ptr->index = -1;
-    
+
     strncpy(ptr->token_name, value, TOKEN_NAME_LENGTH);
     ptr->type = type;
-    
 
-    if (type == DATA_TYPE){
-      //Buffered so that addSymbol in st.c knows what the data type is
-      memset(data_type_buffer, '\0', sizeof(data_type_buffer));
-      strcat(data_type_buffer, value);
+    if (type == DATA_TYPE)
+    {
+        //Buffered so that addSymbol in st.c knows what the data type is
+        memset(data_type_buffer, '\0', sizeof(data_type_buffer));
+        strcat(data_type_buffer, value);
     }
-    else if(type == FUNCTION || type == IDENTIFIER){
-      // Add to the current local symbol table
-      // Assign the returned value to the index
+    else if (type == FUNCTION || type == IDENTIFIER)
+    {
+        // Add to the current local symbol table
+        // Assign the returned value to the index
 
-      int ret_val = addEntry(ptr);
-      if(ret_val == -2){
-        printf("Symbol table entry exists for %s\n", ptr->token_name);
-      }
-      else 
-        ptr->index = ret_val;
+        int ret_val = addEntry(ptr);
+        if (ret_val == -2)
+        {
+            printf("Symbol table entry exists for %s\n", ptr->token_name);
+        }
+        else
+            ptr->index = ret_val;
     }
-    else if (type == SEMI_COLON){
-      memset(data_type_buffer, '\0', sizeof(data_type_buffer));
+    else if (type == SEMI_COLON)
+    {
+        memset(data_type_buffer, '\0', sizeof(data_type_buffer));
     }
-    
+
     return ptr;
 }
 
@@ -118,28 +121,31 @@ Token *getNextToken(FILE *fin)
             buffer[buf_index++] = ch;
             ch = fgetc(fin);
         }
-        
+
         if (isDataType(buffer))
             type = DATA_TYPE;
         else if (isKeyword(buffer))
             type = KEYWORD;
-        else {
-          int temp = ch;
-          long int extra_chars_read = 0;
+        else
+        {
+            int temp = ch;
+            long int extra_chars_read = 0;
 
-          if(isspace(temp)){
-            while(isspace(temp)){
-              temp = fgetc(fin);
-              extra_chars_read++;
+            if (isspace(temp))
+            {
+                while (isspace(temp))
+                {
+                    temp = fgetc(fin);
+                    extra_chars_read++;
+                }
             }
-          }
-           
-          if(temp == '(')
-            type = FUNCTION;
-          else 
-            type = IDENTIFIER;
-          
-          fseek(fin, -1 * extra_chars_read, SEEK_CUR);
+
+            if (temp == '(')
+                type = FUNCTION;
+            else
+                type = IDENTIFIER;
+
+            fseek(fin, -1 * extra_chars_read, SEEK_CUR);
         }
 
         fseek(fin, -1L, SEEK_CUR);
@@ -223,9 +229,10 @@ Token *getNextToken(FILE *fin)
             type = LOG_OP;
             colNum++;
         }
-        else { 
-          type = AMPERSAND;  
-          fseek(fin, -1L, SEEK_CUR);
+        else
+        {
+            type = AMPERSAND;
+            fseek(fin, -1L, SEEK_CUR);
         }
     }
     else if (ch == '|')
@@ -319,22 +326,24 @@ static char dataTypes[][10] = {
     "short",
     "char", "bool", "void"};
 
-size_t getDataTypeSize(char* dt){
-  if(strcmp(dt, "int") == 0)
-    return sizeof(int);
-  else if(strcmp(dt, "char") == 0)
-    return sizeof(char);
-  else if(strcmp(dt, "float") == 0)
-    return sizeof(float);
-  else if(strcmp(dt, "void") == 0)
-    return sizeof(void);
-  else if(strcmp(dt, "double") == 0)
-    return sizeof(double);
-  else if(strcmp(dt, "long") == 0)
-    return sizeof(long);
-  else if(strcmp(dt, "bool") == 0 || strcmp(dt, "short") == 0)
-    return sizeof(short);
-  else return 0;
+size_t getDataTypeSize(char *dt)
+{
+    if (strcmp(dt, "int") == 0)
+        return sizeof(int);
+    else if (strcmp(dt, "char") == 0)
+        return sizeof(char);
+    else if (strcmp(dt, "float") == 0)
+        return sizeof(float);
+    else if (strcmp(dt, "void") == 0)
+        return sizeof(void);
+    else if (strcmp(dt, "double") == 0)
+        return sizeof(double);
+    else if (strcmp(dt, "long") == 0)
+        return sizeof(long);
+    else if (strcmp(dt, "bool") == 0 || strcmp(dt, "short") == 0)
+        return sizeof(short);
+    else
+        return 0;
 }
 
 int isKeyword(char str[])

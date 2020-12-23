@@ -18,7 +18,7 @@ typedef enum
   Follow_Id_List_Prime,
   Follow_Id_List_Prime_Prime,
   Follow_Stmt_List,
-  Follow_Stmt, 
+  Follow_Stmt,
   Follow_Decision_Stmt,
   Follow_Decision_Stmt_Prime,
   Follow_Loop_Stmt,
@@ -32,30 +32,31 @@ typedef enum
   Follow_Factor
 } Rule_Numbers;
 
-int LEN_FOLLOW_SET[NUM_OF_RULES] = {1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1,1,1, 2, 2, 3, 3, 4};
+int LEN_FOLLOW_SET[NUM_OF_RULES] = {1, 2, 1, 1, 1, 1, 1, 2, 3, 3, 3, 2, 2, 2, 3, 3, 4, 4, 5};
 
 //TODO:Currently only lists non keyword follow items. Generalise this with the strings instead
 TokenType FollowSet[NUM_OF_RULES][5] =
-    {{END_OF_FILE},
-     {IDENTIFIER, RIGHT_CURLY_BRACE},
-     {IDENTIFIER},
-     {SEMI_COLON},
-     {SEMI_COLON},
-     {SEMI_COLON},
-     {RIGHT_CURLY_BRACE},
-     {IDENTIFIER, RIGHT_CURLY_BRACE},
-     {LEFT_PAREN},
-     {LEFT_PAREN},
-     {RIGHT_CURLY_BRACE},
-     {SEMI_COLON},
-     {SEMI_COLON},
-     {SEMI_COLON},
-     {SEMI_COLON, REL_OP},
-     {SEMI_COLON, REL_OP},
-     {SEMI_COLON, REL_OP, ADD_OP},
-     {SEMI_COLON, REL_OP, ADD_OP},
-     {SEMI_COLON, REL_OP, ADD_OP, MUL_OP},
-    };
+    {
+        {END_OF_FILE},
+        {IDENTIFIER, KEYWORD, RIGHT_CURLY_BRACE},
+        {IDENTIFIER},
+        {SEMI_COLON},
+        {SEMI_COLON},
+        {SEMI_COLON},
+        {RIGHT_CURLY_BRACE},
+        {IDENTIFIER, KEYWORD, RIGHT_CURLY_BRACE},
+        {IDENTIFIER, KEYWORD, RIGHT_CURLY_BRACE},
+        {IDENTIFIER, KEYWORD, RIGHT_CURLY_BRACE},
+        {IDENTIFIER, KEYWORD, RIGHT_CURLY_BRACE},
+        {SEMI_COLON, RIGHT_PAREN},
+        {SEMI_COLON, RIGHT_PAREN},
+        {SEMI_COLON, RIGHT_PAREN},
+        {SEMI_COLON, REL_OP, RIGHT_PAREN},
+        {SEMI_COLON, REL_OP, RIGHT_PAREN},
+        {SEMI_COLON, REL_OP, ADD_OP, RIGHT_PAREN},
+        {SEMI_COLON, REL_OP, ADD_OP, RIGHT_PAREN},
+        {SEMI_COLON, REL_OP, ADD_OP, MUL_OP, RIGHT_PAREN},
+};
 
 FILE *fin;
 Token *prevToken;
@@ -71,16 +72,16 @@ void Stmt_List();           // Stmt_List --> Stmt Stmt_List | EPSILON
 void Stmt();                // Stmt --> Assign_Stmt ; | Decision_Stmt | Loop_Stmt
 void Decision_Stmt();       // Decision_Stmt --> if(Expr){ Stmt_List } Decision_Stmt_Prime
 void Decision_Stmt_Prime(); // Decision_Stmt_Prime --> else { Stmt_list } | EPSILON
-void Loop_Stmt();           // while(Expr){Stmt_List} | for(Assign_Stmt; Expr; Assign_Stmt){Stmt_List} 
+void Loop_Stmt();           // while(Expr){Stmt_List} | for(Assign_Stmt; Expr; Assign_Stmt){Stmt_List}
 void Assign_Stmt();         // Assign_Stmt --> id = Expr
 void Expr();                // Expr --> Simple_Expr Expr_Prime
 void Expr_Prime();          // REL_OP Simple_Expr | EPSILON
-void Simple_Expr();         // Term Simple_Expr_Prime 
+void Simple_Expr();         // Term Simple_Expr_Prime
 void Simple_Expr_Prime();   // ADD_OP Term Simple_Expr_Prime | EPISILON
 void Term();                // Factor Term_Prime
 void Term_Prime();          // MUL_OP Factor Term_Prime | EPSILON
 void Factor();              // IDENTIFIER | NUM_CONST
-// Note: EPSILON is not a real token, we move on to the next Production with the last token read. 
+// Note: EPSILON is not a real token, we move on to the next Production with the last token read.
 
 void error(TokenType type);
 void errorWithString(TokenType type, char *name);
@@ -104,7 +105,17 @@ int parse(FILE *fin)
 
   printf("Begin Parser: \n");
 
-  Program();
+  // Program();
+
+  while (1)
+  {
+    _getNextToken();
+    // displayToken(token);
+
+    if (token->type == END_OF_FILE)
+      break;
+  }
+  printf("Parsing Sucessful!");
   return 0;
 }
 
@@ -222,19 +233,22 @@ void Id_List_Prime() //Produces EPSILON
   {
     Id_List();
   }
-  else if (token->type == LEFT_SQUARE_BRACKET){
+  else if (token->type == LEFT_SQUARE_BRACKET)
+  {
     _getNextToken();
 
-    if (token->type == NUM_CONST){
+    if (token->type == NUM_CONST)
+    {
       _getNextToken();
 
-      if(token->type == RIGHT_SQUARE_BRACKET){
+      if (token->type == RIGHT_SQUARE_BRACKET)
+      {
         Id_List_Prime_Prime();
       }
-      else 
+      else
         error(RIGHT_SQUARE_BRACKET);
     }
-    else 
+    else
       error(NUM_CONST);
   }
   else if (inSyncSet(Follow_Id_List_Prime))
@@ -247,244 +261,323 @@ void Id_List_Prime() //Produces EPSILON
     errorFollow(Follow_Id_List_Prime);
 }
 
-void Id_List_Prime_Prime(){ //Produces EPISLON
+void Id_List_Prime_Prime()
+{ //Produces EPISLON
   _getNextToken();
 
-  if(token->type == COMMA){
+  if (token->type == COMMA)
+  {
     Id_List();
   }
-  else if(inSyncSet(Follow_Id_List_Prime_Prime)){
+  else if (inSyncSet(Follow_Id_List_Prime_Prime))
+  {
     //Produced EPSILON
     ungetToken(fin, token);
     return;
   }
-  else errorFollow(Follow_Id_List_Prime_Prime);
+  else
+    errorFollow(Follow_Id_List_Prime_Prime);
 }
 
-
-void Stmt_List(){ //Produces EPSILON
+void Stmt_List()
+{ //Produces EPSILON
   _getNextToken();
-  
+
   //Check FIRST of Stmt_List
-  if(token->type == IDENTIFIER || strcmp(token->token_name,"if")==0||strcmp(token->token_name,"for")==0||strcmp(token->token_name, "while")==0){
+  if (token->type == IDENTIFIER || token->type == KEYWORD)
+  {
     Stmt();
     Stmt_List();
- }
-  else if(inSyncSet(Follow_Stmt_List)){
+  }
+  else if (inSyncSet(Follow_Stmt_List))
+  {
     //Produced EPSILON
     ungetToken(fin, token);
     return;
   }
-
-  else errorFollow(Follow_Stmt_List);
+  else
+    errorFollow(Follow_Stmt_List);
 }
 
-void Stmt(){
+void Stmt()
+{
   // Checking FIRST of Stmt
-  if(token->type == IDENTIFIER){
+  if (token->type == IDENTIFIER)
+  {
     Assign_Stmt();
 
     _getNextToken();
-    if(token->type == SEMI_COLON){
+    if (token->type == SEMI_COLON)
+    {
       return;
     }
-    else error(SEMI_COLON);
-  } 
+    else
+      error(SEMI_COLON);
+  }
 
-  else if (strcmp("if", token->token_name) == 0){
+  else if (strcmp(token->token_name, "if") == 0)
+  {
     Decision_Stmt();
   }
 
-  else if(strcmp("for", token->token_name) == 0 || strcmp(token->token_name,"while") == 0){
+  else if (strcmp("for", token->token_name) == 0 || strcmp(token->token_name, "while") == 0)
+  {
     Loop_Stmt();
   }
-  else errorFollow(Follow_Stmt);
+  else
+  {
+    fprintf(stderr, "Expected {if, for, while, or IDENTIFIER}\n");
+    error(KEYWORD);
+    error(IDENTIFIER);
+  }
 }
 
-void Decision_Stmt(){
+void Decision_Stmt()
+{
   _getNextToken();
 
-  if(token->type = LEFT_PAREN){
+  if (token->type == LEFT_PAREN)
+  {
     Expr();
 
     _getNextToken();
-    if(token->type == RIGHT_PAREN){
-      Decision_Stmt_Prime();
+    if (token->type == RIGHT_PAREN)
+    {
+      _getNextToken();
+      if (token->type == LEFT_CURLY_BRACE)
+      {
+        Stmt_List();
+
+        _getNextToken();
+        if (token->type == RIGHT_CURLY_BRACE)
+        {
+          Decision_Stmt_Prime();
+        }
+        else
+          error(RIGHT_CURLY_BRACE);
+      }
+      else
+        error(LEFT_CURLY_BRACE);
     }
-    else error(RIGHT_PAREN);
+    else
+      error(RIGHT_PAREN);
   }
-  else error(LEFT_PAREN);
+  else
+    error(LEFT_PAREN);
 }
 
-void Decision_Stmt_Prime(){//Produces EPSILON
+void Decision_Stmt_Prime()
+{ //Produces EPSILON
   _getNextToken();
 
-  if(strcmp(token->token_name, "else") == 0){
+  if (strcmp(token->token_name, "else") == 0)
+  {
     _getNextToken();
 
-    if(token->type == LEFT_CURLY_BRACE){
+    if (token->type == LEFT_CURLY_BRACE)
+    {
       Stmt_List();
 
       _getNextToken();
-      if(token->type == RIGHT_CURLY_BRACE){
+      if (token->type == RIGHT_CURLY_BRACE)
+      {
         return;
       }
-      else error(RIGHT_CURLY_BRACE);
+      else
+        error(RIGHT_CURLY_BRACE);
     }
-    else error(LEFT_CURLY_BRACE);
+    else
+      error(LEFT_CURLY_BRACE);
   }
-  else if(inSyncSet(Follow_Decision_Stmt_Prime)){
+  else if (inSyncSet(Follow_Decision_Stmt_Prime))
+  {
     //produced epsilon
     ungetToken(fin, token);
     return;
   }
-  else if(){
-    //Temp hack: check if a keyword in follow of Decision_Stmt_Prime
-
-  }
-  else errorFollow(Follow_Decision_Stmt_Prime);
+  else
+    errorFollow(Follow_Decision_Stmt_Prime);
 }
 
-void Loop_Stmt(){
-  _getNextToken();
-
-  if(strcmp(token->token_name, "for") == 0){
+void Loop_Stmt()
+{
+  if (strcmp(token->token_name, "for") == 0)
+  {
     _getNextToken();
 
-    if(token->type == LEFT_PAREN){
+    if (token->type == LEFT_PAREN)
+    {
       Assign_Stmt();
 
       _getNextToken();
-      if(token->type == SEMI_COLON){
+      if (token->type == SEMI_COLON)
+      {
         Expr();
 
         _getNextToken();
-        if(token->type == SEMI_COLON){
+        if (token->type == SEMI_COLON)
+        {
           Assign_Stmt();
 
           _getNextToken();
-          if(token->type == RIGHT_PAREN){
+          if (token->type == RIGHT_PAREN)
+          {
             return;
           }
-          else error(RIGHT_PAREN);
+          else
+            error(RIGHT_PAREN);
         }
-        else error(SEMI_COLON);
+        else
+          error(SEMI_COLON);
       }
-      else error(SEMI_COLON);
+      else
+        error(SEMI_COLON);
     }
-    else error(LEFT_PAREN);
-  } //end of for stmt check
+    else
+      error(LEFT_PAREN);
+  } //end of FOR loop stmt check
 
-
-  else if(strcmp(token->token_name, "while") == 0){
+  else if (strcmp(token->token_name, "while") == 0)
+  {
     _getNextToken();
 
-    if(token->type == LEFT_PAREN){
+    if (token->type == LEFT_PAREN)
+    {
       Expr();
 
       _getNextToken();
-      if(token->type == RIGHT_PAREN){
+      if (token->type == RIGHT_PAREN)
+      {
         _getNextToken();
 
-        if(token->type == LEFT_CURLY_BRACE){
+        if (token->type == LEFT_CURLY_BRACE)
+        {
           Stmt_List();
 
           _getNextToken();
-          if(token->type == RIGHT_CURLY_BRACE)
+          if (token->type == RIGHT_CURLY_BRACE)
             return;
-          else error(RIGHT_CURLY_BRACE);
+          else
+            error(RIGHT_CURLY_BRACE);
         }
-        else error(LEFT_CURLY_BRACE);
+        else
+          error(LEFT_CURLY_BRACE);
       }
-      else error(RIGHT_PAREN);
+      else
+        error(RIGHT_PAREN);
     }
-    else error(LEFT_PAREN);
+    else
+      error(LEFT_PAREN);
   }
-  else {
+  else
+  {
     fprintf(stderr, "Expected a loop stmt keyword 'for' | 'while'\n");
+    error(KEYWORD);
   };
 }
 
-void Assign_Stmt(){
+void Assign_Stmt()
+{
   //Check first of Assign_Stmt
-  if(token->type == IDENTIFIER){
+  if (token->type == IDENTIFIER)
+  {
     _getNextToken();
 
-    if(token->type == ASSIGN_OP){
+    if (token->type == ASSIGN_OP)
+    {
       Expr();
     }
-    else error(ASSIGN_OP);
+    else
+      error(ASSIGN_OP);
   }
-  else error(IDENTIFIER);
+  else
+    error(IDENTIFIER);
 }
 
-void Expr(){
+void Expr()
+{
   Simple_Expr();
   Expr_Prime();
 }
 
-void Expr_Prime(){ //Produces EPSILON
+void Expr_Prime()
+{ //Produces EPSILON
   _getNextToken();
 
   //Check FIRST set of Expr_Prime
-  if(token->type == REL_OP){
+  if (token->type == REL_OP)
+  {
     Simple_Expr();
   }
-  else if(inSyncSet(Follow_Expr_Prime)){
+  else if (inSyncSet(Follow_Expr_Prime))
+  {
     //Produced EPSILON
     ungetToken(fin, token);
     return;
   }
-  else errorFollow(Follow_Expr_Prime);
+  else
+    errorFollow(Follow_Expr_Prime);
 }
 
-void Simple_Expr(){
+void Simple_Expr()
+{
   Term();
   Simple_Expr_Prime();
 }
 
-void Simple_Expr_Prime(){ //Produces EPSILON
+void Simple_Expr_Prime()
+{ //Produces EPSILON
   _getNextToken();
 
   //Check FIRST set of Simple_Expr_Prime
-  if(token->type == ADD_OP){
+  if (token->type == ADD_OP)
+  {
     Term();
     Simple_Expr_Prime();
   }
-  else if(inSyncSet(Follow_Simple_Expr_Prime)){
+  else if (inSyncSet(Follow_Simple_Expr_Prime))
+  {
     //Produced EPSILON
     ungetToken(fin, token);
     return;
   }
-  else errorFollow(Follow_Simple_Expr_Prime);
+  else
+    errorFollow(Follow_Simple_Expr_Prime);
 }
 
-void Term(){
+void Term()
+{
   Factor();
   Term_Prime();
 }
 
-void Term_Prime(){
+void Term_Prime()
+{
   _getNextToken();
 
   //Check FIRST set of Term_Prime
-  if(token->type == MUL_OP){
+  if (token->type == MUL_OP)
+  {
     Factor();
     Term_Prime();
   }
-  else if(inSyncSet(Follow_Term_Prime)){
+  else if (inSyncSet(Follow_Term_Prime))
+  {
     ungetToken(fin, token);
     return;
   }
-  else errorFollow(Follow_Term_Prime);
+  else
+    errorFollow(Follow_Term_Prime);
 }
 
-void Factor(){
+void Factor()
+{
   _getNextToken();
 
-  if(token->type == IDENTIFIER || token->type == NUM_CONST)
+  if (token->type == IDENTIFIER || token->type == NUM_CONST)
     return;
-  else {
+  else
+  {
     printf("Should have been either, fix this ambiguity!");
     error(IDENTIFIER);
     error(NUM_CONST);

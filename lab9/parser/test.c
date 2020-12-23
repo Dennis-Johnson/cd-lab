@@ -1,10 +1,8 @@
 int main()
 {
-  int a[20], b;
-  char ch;
-  a = 3;
-
-  if(a == 3){
-    return;
+  int a[2], b = 3;
+  if (b > 3)
+  {
+    b = 6;
   }
 }

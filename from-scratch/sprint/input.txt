@@ -1,0 +1,14 @@
+class B {
+    s:string <- "Hello"
+    
+    g(y: string):int{
+        y.concat(s)
+    };
+
+    --commments
+    --commments
+
+    f(x:int):int{
+        x + 1;
+    };
+};
