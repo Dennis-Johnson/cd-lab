@@ -175,26 +175,6 @@ Token *getNextToken(FILE *fin)
     return createToken(row, col, name, type);
 }
 
-char *TokenStrings[] = {
-    "KEYWORD",
-    "IDENTIFIER",
-    "DATA_TYPE",
-    "NUMBER",
-    "STRING",
-    "COLON",
-    "SEMICOLON",
-    "DOT",
-    "LEFT_PAREN",
-    "RIGHT_PAREN",
-    "LEFT_CURLY",
-    "RIGHT_CURLY",
-    "END_OF_FILE",
-    "ADD_OP",
-    "ARROW",
-    "DEFAULT",
-    "WHITESPACE",
-    "NEW_LINE"};
-
 char *Keywords[NUM_KEYWORDS] = {
     "class", "concat"};
 char *DataTypes[NUM_DATA_TYPES] = {

@@ -31,6 +31,26 @@ typedef enum
     NEW_LINE
 } TokenType;
 
+char *TokenStrings[] = {
+    "KEYWORD",
+    "IDENTIFIER",
+    "DATA_TYPE",
+    "NUMBER",
+    "STRING",
+    "COLON",
+    "SEMICOLON",
+    "DOT",
+    "LEFT_PAREN",
+    "RIGHT_PAREN",
+    "LEFT_CURLY",
+    "RIGHT_CURLY",
+    "END_OF_FILE",
+    "ADD_OP",
+    "ARROW",
+    "DEFAULT",
+    "WHITESPACE",
+    "NEW_LINE"};
+
 typedef struct Token
 {
     int row, col;
