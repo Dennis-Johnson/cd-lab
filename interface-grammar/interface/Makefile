@@ -1,5 +1,5 @@
 cc = clang
-flags = -pedantic -Wall
+flags = -pedantic -Wall -g
 target = rdp
 
 all: $(target)
@@ -17,4 +17,4 @@ parser: parser.c
 	$(cc) $(flags) -c parser.c
 
 clean:
-	rm -f *.o $(target)
+	rm -rf .dSYM *.o $(target)
