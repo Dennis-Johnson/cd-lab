@@ -1,5 +1,5 @@
-cc = clang
-flags = -pedantic -Wall -g
+cc = gcc
+flags = -pedantic -Wall -o2
 target = rdp
 
 all: $(target)
